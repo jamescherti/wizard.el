@@ -98,6 +98,17 @@ Returns the newly created indirect buffer."
      (list (if current-prefix-arg
                (read-buffer "Name of indirect buffer: " (buffer-name)))
            t)))
+  ;; Clear Evil mode highlights inherited from the clone operation.
+  ;; When creating a cloned indirect buffer, it inherits the active state of the
+  ;; base buffer, including the Evil search highlight overlays. This change adds
+  ;; a check to evaluate `evil-ex-nohighlight' within the scope of the newly
+  ;; created buffer to flush the inherited search state, provided
+  ;; `evil-local-mode' is active. This ensures the clone starts with a clean
+  ;; visual state.
+  (when (and (bound-and-true-p evil-local-mode)
+             (fboundp 'evil-ex-nohighlight))
+    (evil-ex-nohighlight))
+
   (let* ((point-pos (point))
          (previous-window (selected-window))
          (buffer (current-buffer))
