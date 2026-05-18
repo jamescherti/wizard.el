@@ -28,6 +28,8 @@
 
 ;;; Code:
 
+;;; Group
+
 (defgroup bufferwizard nil
   "Buffer wizard settings and configuration."
   :group 'bufferwizard
@@ -346,7 +348,7 @@ specified interactively), then remove all hi-lock highlighting."
   (when (fboundp 'hi-lock-unface-buffer)
     (call-interactively #'hi-lock-unface-buffer)))
 
-;;; Highlight TODO code tags
+;;; Highlight code tags
 
 (defcustom bufferwizard-hl-todo-keywords
   '(("TODO"   . font-lock-warning-face)
@@ -519,6 +521,87 @@ original position prior to the paste operation."
           (insert content)))
     (save-excursion
       (bufferwizard--insert-aligned))))
+
+;;; Point movement
+
+(defcustom bufferwizard-point-ignore-invisible t
+  "Non-nil means point movement functions ignore invisible text.
+When set to a non-nil value, functions such as
+`bufferwizard-point-forward-to-empty-line' and
+`bufferwizard-point-backward-to-lower-indentation' will skip over lines that are
+currently hidden or invisible. If set to nil, invisible text is included and
+evaluated during point movement searches."
+  :type 'boolean
+  :group 'bufferwizard)
+
+(defun bufferwizard--point-keep-searching-until-empty (_initial-indentation)
+  "Return t when the current line is NOT empty."
+  (not (looking-at-p "^\\s-*$")))
+
+(defun bufferwizard--point-keep-searching-until-indent-lower (initial-indentation)
+  "Return t when the indentation is >= INITIAL-INDENTATION, or the line is empty."
+  (or (looking-at-p "^\\s-*$")
+      (>= (current-indentation) initial-indentation)))
+
+(defun bufferwizard--point-find-pos (direction func-keep-searching)
+  "Get the buffer position of the previous/next line with lower indentation.
+DIRECTION is 1 for forward, -1 for backward.
+FUNC-KEEP-SEARCHING is a predicate function called with the initial indentation.
+Return the buffer position (point) instead of line number for performance.
+Return nil if no matching line is found."
+  (setq direction (if (>= direction 0)
+                      1
+                    -1))
+  (save-excursion
+    (let ((initial-indentation (current-indentation))
+          (found nil))
+      (while (and (not found)
+                  (not (if (> direction 0)
+                           (eobp)
+                         (bobp)))
+                  (zerop (forward-line direction)))
+        (unless (or (and bufferwizard-point-ignore-invisible
+                         (invisible-p (point)))
+                    (funcall func-keep-searching initial-indentation))
+          (setq found t)))
+      (when found
+        (point)))))
+
+(defun bufferwizard--point-move (direction func-keep-searching)
+  "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
+DIRECTION > 0 moves forward; < 0 moves backward."
+  (let ((target-pos (bufferwizard--point-find-pos direction
+                                                  func-keep-searching)))
+    (when target-pos
+      (goto-char target-pos))))
+
+;;;###autoload
+(defun bufferwizard-point-backward-to-lower-indentation ()
+  "Move backward to the lower indentation."
+  (interactive)
+  (bufferwizard--point-move
+   -1 #'bufferwizard--point-keep-searching-until-indent-lower))
+
+;;;###autoload
+(defun bufferwizard-point-forward-to-lower-indentation ()
+  "Move forward to the lower indentation."
+  (interactive)
+  (bufferwizard--point-move
+   1 #'bufferwizard--point-keep-searching-until-indent-lower))
+
+;;;###autoload
+(defun bufferwizard-point-backward-to-empty-line ()
+  "Move backward to empty line."
+  (interactive)
+  (bufferwizard--point-move
+   -1 #'bufferwizard--point-keep-searching-until-empty))
+
+;;;###autoload
+(defun bufferwizard-point-forward-to-empty-line ()
+  "Move forward to empty line."
+  (interactive)
+  (bufferwizard--point-move
+   1 #'bufferwizard--point-keep-searching-until-empty))
 
 ;;; Provide
 (provide 'bufferwizard)
