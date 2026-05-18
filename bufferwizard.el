@@ -651,16 +651,18 @@ DIRECTION > 0 moves forward; < 0 moves backward."
           (activate-mark))))))
 
 ;;;###autoload
-(defun bufferwizard-move-region-up ()
-  "Move the current region up by 1 line."
-  (interactive)
-  (bufferwizard-move-region -1))
+(defun bufferwizard-move-region-up (&optional count)
+  "Move the current region up by COUNT lines.
+If COUNT is omitted, it defaults to 1."
+  (interactive "p")
+  (bufferwizard-move-region (- (or count 1))))
 
 ;;;###autoload
-(defun bufferwizard-move-region-down ()
-  "Move the current region down by 1 line."
-  (interactive)
-  (bufferwizard-move-region 1))
+(defun bufferwizard-move-region-down (&optional count)
+  "Move the current region down by COUNT lines.
+If COUNT is omitted, it defaults to 1."
+  (interactive "p")
+  (bufferwizard-move-region (or count 1)))
 
 ;;; Provide
 (provide 'bufferwizard)
