@@ -13,6 +13,8 @@ The **bufferwizard** Emacs package offers a suite of helper functions:
   - `(bufferwizard-point-backward-to-lower-indentation)` and `(bufferwizard-point-forward-to-lower-indentation)`: Move the point backward or forward to the nearest line with a lower indentation level.
   - `(bufferwizard-point-backward-to-empty-line)` and `(bufferwizard-point-forward-to-empty-line)`: Move the point backward or forward to the nearest empty line.
   - (Setting: When non-nil, the `bufferwizard-point-ignore-invisible` variable causes `bufferwizard-point-*` commands to skip invisible text.)
+- Region movement:
+  - `(bufferwizard-move-region-up)` and `(bufferwizard-move-region-down)`: Move the currently active region (selected text) up or down by one line. These commands maintain the active selection after moving and provide support for both standard Emacs regions and Evil mode visual states.
 
 ## Installation
 
