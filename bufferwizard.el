@@ -581,10 +581,41 @@ Return nil if no matching line is found."
 (defun bufferwizard--point-move (direction func-keep-searching)
   "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
 DIRECTION > 0 moves forward; < 0 moves backward."
-  (let ((target-pos (bufferwizard--point-find-pos direction
-                                                  func-keep-searching)))
+  (let* ((region (use-region-p))
+         (start (when region (region-beginning)))
+         (end (when region (region-end)))
+         target-pos)
+
+    (when (and region
+               start
+               end
+               (bound-and-true-p evil-local-mode)
+               (fboundp 'evil-visual-state-p)
+               (evil-visual-state-p)
+               (fboundp 'evil-exit-visual-state))
+      ;; For Evil users: Exit visual state explicitly before performing the
+      ;; operation. If we do not do this, Evil will automatically restore the
+      ;; original point and mark after the command finishes, overriding any
+      ;; cursor movement or region updates made within the function.
+      (evil-exit-visual-state))
+
+    (setq target-pos (bufferwizard--point-find-pos direction
+                                                   func-keep-searching))
+
     (when target-pos
-      (goto-char target-pos))))
+      (if (not region)
+          (goto-char target-pos)
+        (when (and start end)
+          (if (< target-pos start)
+              (progn
+                (goto-char target-pos)
+                (set-mark end))
+            (goto-char target-pos)
+            (set-mark start))
+
+          ;; Ensure that the region remains active after the command finishes.
+          (setq deactivate-mark nil)
+          (activate-mark))))))
 
 ;;;###autoload
 (defun bufferwizard-point-backward-to-lower-indentation ()
@@ -613,7 +644,6 @@ DIRECTION > 0 moves forward; < 0 moves backward."
   (interactive)
   (bufferwizard--point-move
    1 #'bufferwizard--point-keep-searching-until-empty))
-
 ;;; Move region
 
 (defcustom bufferwizard-move-region-skip-invisible t
