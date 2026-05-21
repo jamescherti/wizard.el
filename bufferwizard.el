@@ -446,7 +446,7 @@ the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
   (lambda () (bufferwizard-hl-todo-local-mode 1))
   :group 'bufferwizard)
 
-;;; Paste using indentation
+;;; Clipboard: Paste using indentation
 
 (defun bufferwizard--unindent-string (input-str)
   "Unindent INPUT-STR by removing the minimal common indentation."
@@ -532,6 +532,26 @@ original position prior to the paste operation."
           (insert content)))
     (save-excursion
       (bufferwizard--insert-aligned))))
+
+;;; Clipboard: Copy without indentation
+
+;;;###autoload
+(defun bufferwizard-copy-unindented ()
+  "Copy the active region or current line with base indentation removed.
+If a region is active, copy the text within the region. Otherwise, copy the
+current line.
+Before adding the text to the kill ring, this function removes the minimal
+common leading whitespace from all copied lines. This allows you to extract
+blocks of code without preserving their original structural indentation."
+  (interactive)
+  (let* ((bounds (if (use-region-p)
+                     (cons (region-beginning) (region-end))
+                   (cons (line-beginning-position) (line-end-position))))
+         (start (car bounds))
+         (end (cdr bounds))
+         (text (buffer-substring-no-properties start end))
+         (unindented-text (bufferwizard--unindent-string text)))
+    (kill-new unindented-text)))
 
 ;;; Point movement
 
@@ -644,6 +664,7 @@ DIRECTION > 0 moves forward; < 0 moves backward."
   (interactive)
   (bufferwizard--point-move
    1 #'bufferwizard--point-keep-searching-until-empty))
+
 ;;; Move region
 
 (defcustom bufferwizard-move-region-skip-invisible t
