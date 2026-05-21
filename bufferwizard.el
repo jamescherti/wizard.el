@@ -119,7 +119,7 @@ Returns the newly created indirect buffer."
                            (window-hscroll previous-window)))
          (indirect-buffer (clone-indirect-buffer newname display-flag norecord)))
     (when (buffer-live-p indirect-buffer)
-      (switch-to-buffer indirect-buffer)
+      (set-window-buffer nil indirect-buffer)
       (with-current-buffer indirect-buffer
         (goto-char point-pos)
         (let ((current-window (selected-window)))
@@ -179,7 +179,7 @@ Preserve point, `window-start', and horizontal scrolling."
                            (window-start window)))
            (window-hscroll (when buffer-in-current-window
                              (window-hscroll window))))
-      (switch-to-buffer base-buffer)
+      (set-window-buffer nil base-buffer)
       (goto-char point-pos)
       ;; Use the active window after the switch, not necessarily the old one
       (let ((new-window (selected-window)))
