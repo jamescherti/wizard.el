@@ -9,6 +9,7 @@ The **bufferwizard** Emacs package offers a suite of helper functions:
 - **Clone buffer:** `(bufferwizard-clone-indirect-buffer)` and `(bufferwizard-clone-and-switch-to-indirect-buffer)`: These functions are enhanced versions of the built-in `clone-indirect-buffer`. They create an indirect buffer with the same content as the current buffer while preserving the point position, window start, and horizontal scroll position. This package also provides the `(bufferwizard-switch-to-base-buffer)` function, which allows switching from an indirect buffer to its corresponding base buffer. (For Evil users: These functions also prevent Evil mode search highlights from incorrectly carrying over into newly cloned indirect buffers.)
 - **Highlight TODO:** `(bufferwizard-hl-todo-mode)`: Automatically highlight codetags (such as TODO, FIXME, BUG, NOTE) in your buffers using custom font-lock rules.
 - **Paste indented text:** `(bufferwizard-paste-indented)`: Paste text from the clipboard while matching the current line's indentation. It unindents the clipboard content by removing the minimal common leading whitespace and aligns it perfectly with current physical column of the cursor.
+- **Better grep:** `(bufferwizard-grep)`: Run Grep with a clean, empty prompt. Unlike the built-in `M-x grep` command, which pre-fills the minibuffer prompt with the entire base grep command, this command allows the user to only type the search arguments. The base grep command is prepended automatically, reducing visual noise and preventing accidental modification of required grep flags.
 - **Copy unindented text:** `(bufferwizard-copy-unindented)`: Copy the active region to the clipboard (kill ring) while removing the minimal common leading whitespace from all lines. If no region is active, it automatically falls back to copying the current line without its leading indentation.
 - **Point navigation:**
   - `(bufferwizard-point-backward-to-lower-indentation)` and `(bufferwizard-point-forward-to-lower-indentation)`: Move the point backward or forward to the nearest line with a lower indentation level.
@@ -73,6 +74,33 @@ The functions `(bufferwizard-toggle-highlight-at-point)` and `(bufferwizard-repl
   ;; replacements.
   (setq case-replace t)
   ```
+
+### Making bufferwizard-grep use rg instead of grep
+
+To make (bufferwizard-grep) use rg (ripgrep) instead of standard grep, add the following snippet to your Emacs initialization file:
+
+```elisp
+(setq grep-use-null-device nil)
+(setq grep-command-position nil)
+(setq grep-command
+      (concat "rg"
+              ;; Include hidden files
+              " --hidden"
+              ;; Exclude VC
+              " -g !.git -g !.svn -g !.hg"
+              ;; Default
+              " --null --line-buffered --color=never --max-columns=1000"
+              " --path-separator / --smart-case --no-heading"
+              " --with-filename --line-number --search-zip"))
+
+;; Synchronize grep-template with the custom ripgrep command defined above.
+;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
+;; with the search regular expression and target file patterns at runtime.
+;; This setup ensures that built-in recursive search utilities like rgrep
+;; and lgrep automatically inherit the same optimized ripgrep options
+;; without duplicating the configuration string.
+(setq grep-template (concat grep-command " <R> <F>"))
+```
 
 ## Author and License
 
