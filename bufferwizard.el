@@ -68,6 +68,7 @@ Returns a list of buffers that are associated with FILENAME."
 
 ;;; Indirect buffers
 
+;;;###autoload
 (defun bufferwizard-clone-indirect-buffer (&optional newname
                                                      display-flag
                                                      norecord)
@@ -132,6 +133,7 @@ Returns the newly created indirect buffer."
               (set-window-hscroll current-window window-hscroll))))))
     indirect-buffer))
 
+;;;###autoload
 (defun bufferwizard-clone-and-switch-to-indirect-buffer (&optional newname
                                                                    norecord)
   "Create an indirect buffer and switch to it.
@@ -162,6 +164,7 @@ Returns the newly created indirect buffer."
            t)))
   (bufferwizard-clone-indirect-buffer newname nil norecord))
 
+;;;###autoload
 (defun bufferwizard-switch-to-base-buffer (&optional buffer)
   "Switch to the base buffer if BUFFER is indirect.
 Preserve point, `window-start', and horizontal scrolling."
@@ -192,6 +195,7 @@ Preserve point, `window-start', and horizontal scrolling."
 
 ;;; Search and replace (string)
 
+;;;###autoload
 (defun bufferwizard-replace-regexp (from-regexp &optional to-string)
   "Replace occurrences of FROM-REGEXP with TO-STRING.
 When TO-STRING is not specified, the user is prompted for input.
@@ -728,6 +732,7 @@ If COUNT is omitted, it defaults to 1."
 
 ;;; Alternative to `grep'
 
+;;;###autoload
 (defun bufferwizard-grep (command-args)
   "Run Grep with user-specified COMMAND-ARGS.
 The output from the command goes to the \"*grep*\" buffer.
@@ -757,7 +762,8 @@ history (or into `grep-command' if that history list is empty)."
   (interactive
    (progn
      (require 'grep)
-     (grep-compute-defaults)
+     (when (fboundp 'grep-compute-defaults)
+       (grep-compute-defaults))
      (list (read-shell-command
             "Grep: "
             ""
@@ -769,27 +775,37 @@ history (or into `grep-command' if that history list is empty)."
               nil)))))
 
   (require 'grep)
-  (require 'files-x)
-  (when (and (fboundp 'grep--save-buffers)
-             (fboundp 'null-device))
-    (let* ((default (if (fboundp 'grep-default-command)
-                        (grep-default-command)
-                      ""))
-           (base-command (if current-prefix-arg
-                             default
-                           (if (bound-and-true-p grep-command-position)
-                               (substring grep-command 0 grep-command-position)
-                             grep-command)))
-           (grep-arguments (concat base-command " " command-args)))
-      ;; If called non-interactively, also compute the defaults if we haven't
-      ;; already.
-      (when (eq grep-highlight-matches 'auto-detect)
-        (grep-compute-defaults))
-      (grep--save-buffers)
-      ;; Setting process-setup-function makes exit-message-function work even
-      ;; when async processes aren't supported.
+  (require 'files-x) ; null-device
+  (let* ((default (if (fboundp 'grep-default-command)
+                      (grep-default-command)
+                    ""))
+         (base-command (if current-prefix-arg
+                           default
+                         (if (and (boundp 'grep-command-position)
+                                  grep-command-position
+                                  (boundp 'grep-command)
+                                  (stringp grep-command)
+                                  (>= (length grep-command)
+                                      grep-command-position))
+                             (substring grep-command 0 grep-command-position)
+                           (if (boundp 'grep-command)
+                               grep-command
+                             ""))))
+         (grep-arguments (concat base-command " " command-args)))
+    ;; If called non-interactively, also compute the defaults if we haven't
+    ;; already.
+    (when (and (boundp 'grep-highlight-matches)
+               (eq grep-highlight-matches 'auto-detect)
+               (fboundp 'grep-compute-defaults))
+      (grep-compute-defaults))
+    (when (fboundp 'grep--save-buffers)
+      (grep--save-buffers))
+    ;; Setting process-setup-function makes exit-message-function work even
+    ;; when async processes aren't supported.
+    (when (fboundp 'grep-mode)
       (compilation-start
-       (let ((null-device (null-device)))
+       (let ((null-device (when (fboundp 'null-device)
+                            (null-device))))
          (if (and (bound-and-true-p grep-use-null-device)
                   null-device)
              (concat grep-arguments " " null-device)
