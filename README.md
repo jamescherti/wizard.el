@@ -17,6 +17,7 @@ The **bufferwizard** Emacs package offers a suite of helper functions:
   - (Setting: When non-nil, the `bufferwizard-point-ignore-invisible` variable causes `bufferwizard-point-*` commands to skip invisible text.)
 - Region movement:
   - `(bufferwizard-move-region-up)` and `(bufferwizard-move-region-down)`: Move the currently active region (selected text) up or down. These commands maintain the active selection after moving and provide support for both standard Emacs regions and Evil mode visual states.
+- `(bufferwizard-reload-current-buffer)`: Completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, which only re-reads text while preserving the underlying buffer objects, this command kills and reopens the file, and then restores the base buffer and all indirect buffers or clones. This provides a true clean slate hard reset that instantly purges broken states, glitched minor modes, or stale background tool states (such as out-of-sync LSP engine or linter markers). Any unsaved modifications are silently saved beforehand. Despite destroying the original buffer object, it takes an exact snapshot of your window coordinates before deletion to restore the precise point, window start, horizontal scroll, and pixel-exact vertical scroll. This prevents your text or display layout from shifting by even a single pixel.
 
 ## Installation
 

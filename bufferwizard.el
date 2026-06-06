@@ -812,6 +812,107 @@ history (or into `grep-command' if that history list is empty)."
            grep-arguments))
        #'grep-mode))))
 
+;;; Reload buffer
+
+(defun bufferwizard-reload-current-buffer ()
+  "Reload the current buffer from disk, preserving its exact window state.
+
+Unlike the standard `revert-buffer', which only replaces text while retaining
+the same buffer object, this function completely kills and re-creates the buffer
+via `find-alternate-file'. This acts as a true hard reset that clears corrupted
+syntax highlighting, glitched minor modes, or out-of-sync background
+tooling (like LSP markers).
+
+If the buffer is modified, it is saved before reloading. The function fully
+supports indirect buffers by explicitly destroying and reconstructing them.
+Upon completion, it restores the previous point position, horizontal scroll,
+pixel-exact vertical scroll, and window start position across all windows
+displaying the buffer or its indirect clones, as well as any active narrowing.
+
+If called interactively, it displays a message confirming the reload."
+  (interactive)
+  (let* ((orig-buffer (current-buffer))
+         (base-buffer (or (buffer-base-buffer orig-buffer) orig-buffer))
+         (file (buffer-file-name base-buffer)))
+    (unless file
+      (error "Current buffer is not visiting a file"))
+
+    (unless (file-exists-p file)
+      (error "The file doesn't exist: %s" file))
+
+    (let* ((inhibit-redisplay t)
+           (indirect-buffers
+            (delq nil
+                  (mapcar (lambda (buf)
+                            (when (eq (buffer-base-buffer buf) base-buffer)
+                              buf))
+                          (buffer-list))))
+           (all-buffers (cons base-buffer indirect-buffers))
+           (buffer-states (mapcar
+                           (lambda (buf)
+                             (with-current-buffer buf
+                               (list buf
+                                     (buffer-name buf)
+                                     (buffer-narrowed-p)
+                                     (point-min)
+                                     (point-max)
+                                     (point)
+                                     (mapcar (lambda (win)
+                                               (list win
+                                                     (window-hscroll win)
+                                                     (window-vscroll win t)
+                                                     (window-start win)
+                                                     (window-point win)))
+                                             (get-buffer-window-list buf nil t)))))
+                           all-buffers)))
+
+      (when (buffer-modified-p base-buffer)
+        (with-current-buffer base-buffer
+          (save-buffer)))
+
+      (unless (eq orig-buffer base-buffer)
+        (set-window-buffer (selected-window) base-buffer))
+
+      (with-current-buffer base-buffer
+        (find-alternate-file file))
+
+      (let ((new-base-buffer (current-buffer)))
+        (when (and (buffer-file-name)
+                   (string= (file-truename (buffer-file-name))
+                            (file-truename file)))
+          (dolist (state buffer-states)
+            (let* ((old-buf (nth 0 state))
+                   (buf-name (nth 1 state))
+                   (narrowed (nth 2 state))
+                   (min-val (nth 3 state))
+                   (max-val (nth 4 state))
+                   (point-val (nth 5 state))
+                   (win-states (nth 6 state))
+                   (target-buf (if (eq old-buf base-buffer)
+                                   new-base-buffer
+                                 (make-indirect-buffer new-base-buffer buf-name t))))
+
+              (with-current-buffer target-buf
+                (when narrowed
+                  (narrow-to-region min-val max-val))
+                (goto-char point-val))
+
+              (dolist (win-state win-states)
+                (let ((win (nth 0 win-state))
+                      (hscroll (nth 1 win-state))
+                      (vscroll (nth 2 win-state))
+                      (start (nth 3 win-state))
+                      (wpoint (nth 4 win-state)))
+                  (when (window-live-p win)
+                    (set-window-buffer win target-buf)
+                    (set-window-point win wpoint)
+                    (set-window-start win start)
+                    (set-window-vscroll win vscroll t)
+                    (set-window-hscroll win hscroll))))))
+
+          (when (called-interactively-p 'any)
+            (message "Reloaded: %s" (abbreviate-file-name file))))))))
+
 ;;; Provide
 (provide 'bufferwizard)
 
