@@ -3,7 +3,7 @@
 ;; Copyright (C) 2024-2026 James Cherti | https://www.jamescherti.com/contact/
 
 ;; Author: James Cherti <https://www.jamescherti.com/contact/>
-;; Version: 1.1.0
+;; Version: 1.1.1
 ;; URL: https://github.com/jamescherti/bufferwizard.el
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "26.1"))
