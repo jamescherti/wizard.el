@@ -1,23 +1,35 @@
-# wizard.el
+# wizard.el - A Lightweight Suite of Essential Emacs Functions
 ![Build Status](https://github.com/jamescherti/wizard.el/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/github/license/jamescherti/wizard.el)
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
-The **wizard** Emacs package offers a suite of helper functions:
-- **Highlight symbol:** `(wizard-toggle-highlight-at-point)`: Toggles highlighting for the symbol at point. If a selection is active, it highlights the selected text instead. This function checks whether the symbol at point or the selected text is currently highlighted. If it is, the highlight is removed; otherwise, it is applied. (This serves as a lightweight alternative to the `highlight-symbol` package.)
-- **Replace symbol:** `(wizard-replace-symbol-at-point)`: Replace occurrences of a symbol at point with a specified string.
-- **Clone buffer:** `(wizard-clone-indirect-buffer)` and `(wizard-clone-and-switch-to-indirect-buffer)`: These functions are enhanced versions of the built-in `clone-indirect-buffer`. They create an indirect buffer with the same content as the current buffer while preserving the point position, window start, and horizontal scroll position. This package also provides the `(wizard-switch-to-base-buffer)` function, which allows switching from an indirect buffer to its corresponding base buffer. (For Evil users: These functions also prevent Evil mode search highlights from incorrectly carrying over into newly cloned indirect buffers.)
-- **Highlight TODO:** `(wizard-hl-todo-mode)`: Automatically highlight codetags (such as TODO, FIXME, BUG, NOTE) in your buffers using custom font-lock rules.
-- **Paste indented text:** `(wizard-paste-indented)`: Paste text from the clipboard while matching the current line's indentation. It unindents the clipboard content by removing the minimal common leading whitespace and aligns it perfectly with current physical column of the cursor.
-- **Better grep:** `(wizard-grep)`: Run Grep with a clean, empty prompt. Unlike the built-in `M-x grep` command, which pre-fills the minibuffer prompt with the entire base grep command, this command allows the user to only type the search arguments. The base grep command is prepended automatically, reducing visual noise and preventing accidental modification of required grep flags.
-- **Copy unindented text:** `(wizard-copy-unindented)`: Copy the active region to the clipboard (kill ring) while removing the minimal common leading whitespace from all lines. If no region is active, it automatically falls back to copying the current line without its leading indentation.
-- **Point navigation:**
-  - `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)`: Move the point backward or forward to the nearest line with a lower indentation level.
-  - `(wizard-point-backward-to-empty-line)` and `(wizard-point-forward-to-empty-line)`: Move the point backward or forward to the nearest empty line.
-  - (Setting: When non-nil, the `wizard-point-ignore-invisible` variable causes `wizard-point-*` commands to skip invisible text.)
-- Region movement:
-  - `(wizard-move-region-up)` and `(wizard-move-region-down)`: Move the currently active region (selected text) up or down. These commands maintain the active selection after moving and provide support for both standard Emacs regions and Evil mode visual states.
-- `(wizard-reload-current-buffer)`: Completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, which only re-reads text while preserving the underlying buffer objects, this command kills and reopens the file, and then restores the base buffer and all indirect buffers or clones. This provides a true clean slate hard reset that instantly purges broken states, glitched minor modes, or stale background tool states (such as out-of-sync LSP engine or linter markers). Any unsaved modifications are silently saved beforehand. Despite destroying the original buffer object, it takes an exact snapshot of your window coordinates before deletion to restore the precise point, window start, horizontal scroll, and pixel-exact vertical scroll. This prevents your text or display layout from shifting by even a single pixel.
+The **wizard** Emacs package provides a curated collection of quality-of-life enhancements for your daily editing workflow.
+
+The philosophy behind this package is simple: **leverage the robust APIs Emacs already provides.** Instead of rewriting complex logic from scratch or adding heavy external dependencies, **wizard** intelligently wraps and extends built-in Emacs functions to deliver practical features.
+
+## Features Overview
+
+### Visuals & Highlighting
+- **Lightweight symbol highlight:** `(wizard-toggle-highlight-at-point)` toggles highlighting for the symbol under your cursor or the active selection. It is a fast, dependency-free alternative to the *highlight-symbol* package.
+- **Native TODO highlighting:** `(wizard-hl-todo-mode 1)` automatically highlights codetags **TODO, FIXME, BUG, NOTE**, etc. in your buffers using custom font-lock rules. This mode is an alternative to the *hl-todo* package that uses Emacs built-in `hi-lock`.
+
+### Buffer & State Management
+- **True hard reset:** `(wizard-reload-current-buffer)` completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, this command kills and reopens the file, instantly purging broken states, glitched minor modes, or out-of-sync LSP servers. It silently saves your work first and takes an exact snapshot of your window coordinates to restore your point, window start, and pixel-exact scroll position. Your layout will not shift by a single pixel.
+- **Enhanced buffer cloning:** `(wizard-clone-indirect-buffer)` and `(wizard-clone-and-switch-to-indirect-buffer)` improve the built-in clone function. They preserve your point position, window start, and horizontal scroll. Evil users also benefit, as these functions prevent Evil mode search highlights from bleeding into newly cloned indirect buffers. Switch back easily with `(wizard-switch-to-base-buffer)`.
+
+### Smart Text Manipulation
+- **Paste with matching indentation:** `(wizard-paste-indented)` pastes text from your clipboard while automatically matching the current line's indentation. It removes the minimal common leading whitespace from the clipboard content and aligns it perfectly with your cursor.
+- **Copy unindented text:** `(wizard-copy-unindented)` copies the active region while stripping away minimal common leading whitespace. If no region is active, it copies the current line without its leading indentation.
+- **Shift regions easily:** `(wizard-move-region-up)` and `(wizard-move-region-down)` move the currently selected text up or down. These commands maintain the active selection after moving and support both standard Emacs regions and Evil mode visual states.
+
+### Search & Replace
+- **Noise-free Grep:** `(wizard-grep)` runs Grep with a clean, empty prompt. Unlike the built-in `M-x grep` which pre-fills the minibuffer with the entire shell command, this command lets you type only your search arguments. The base command is prepended automatically, reducing visual noise and preventing accidental edits to your flags.
+- **Quick symbol replacement:** `(wizard-replace-symbol-at-point)` lets you instantly replace all occurrences of the symbol under your cursor with a specified string.
+
+### Code Navigation
+- **Indentation jumping:** `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)` move your point to the nearest line with a lower indentation level, making it easy to navigate out of nested code blocks.
+- **Empty line jumping:** `(wizard-point-backward-to-empty-line)` and `(wizard-point-forward-to-empty-line)` quickly jump to the nearest blank line.
+- **Ignore invisible text:** Setting `wizard-point-ignore-invisible` to a non-nil value allows these navigation commands to skip folded or hidden text.
 
 ## Installation
 
@@ -35,30 +47,33 @@ To install `wizard` with `straight.el`:
              :repo "jamescherti/wizard.el"))
 ```
 
-### Installing with use-package and :vc (Built-in feature in Emacs version >= 30)
+### Installing with use-package and :vc (Emacs version >= 30)
 
-To install `wizard` with `use-package` and `:vc` (Emacs >= 30):
+To install `wizard` using the built-in `:vc` keyword:
 
-``` emacs-lisp
+```emacs-lisp
 (use-package wizard
   :vc (:url "https://github.com/jamescherti/wizard.el"
        :rev :newest))
 ```
 
-### Customizations
+## Customizations
 
-#### Codetags highlighting
+### Codetags highlighting
 
-You can customize the codetags that get highlighted by modifying the `wizard-hl-todo-keywords` variable. By default, it highlights `TODO`, `FIXME`, `BUG`, `XXX` (with warning face, which is generally red) and `NOTE`, `HACK`, `DONE` (with doc face, which is generally green).
+You can customize the codetags that get highlighted by modifying the `wizard-hl-todo-keywords` variable. By default, it highlights `TODO`, `FIXME`, `BUG`, `XXX` (with a warning face, generally red) and `NOTE`, `HACK`, `DONE` (with a doc face, generally green).
 
 To enable this feature globally, add the following to your Emacs configuration:
+
 ```elisp
 (wizard-hl-todo-mode 1)
 ```
 
-#### Case sensitivity
+This mode is an alternative to the *hl-todo* package that uses Emacs built-in `hi-lock`.
 
-The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)` depend on built-in functions that can be customized via the following variable:
+### Case sensitivity
+
+The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)` depend on built-in functions that can be customized via the following variables:
 
 - `case-fold-search`: This buffer-local variable determines the behavior of `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)`. When set to t (default), both symbol highlighting and searches become case-insensitive, matching symbols regardless of case. When set to nil, they become case-sensitive, matching symbols only when the case exactly matches the text in the buffer.
   Example:
@@ -76,9 +91,9 @@ The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-a
   (setq case-replace t)
   ```
 
-### Making wizard-grep use rg instead of grep
+### Making wizard-grep use rg (ripgrep) instead of grep
 
-To make (wizard-grep) use rg (ripgrep) instead of standard grep, add the following snippet to your Emacs initialization file:
+To configure `(wizard-grep)` to use ripgrep, add the following snippet to your init file:
 
 ```elisp
 (setq grep-use-null-device nil)
@@ -97,9 +112,6 @@ To make (wizard-grep) use rg (ripgrep) instead of standard grep, add the followi
 ;; Synchronize grep-template with the custom ripgrep command defined above.
 ;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
 ;; with the search regular expression and target file patterns at runtime.
-;; This setup ensures that built-in recursive search utilities like rgrep
-;; and lgrep automatically inherit the same optimized ripgrep options
-;; without duplicating the configuration string.
 (setq grep-template (concat grep-command " <R> <F>"))
 ```
 
