@@ -1,47 +1,47 @@
-# bufferwizard.el
-![Build Status](https://github.com/jamescherti/bufferwizard.el/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/github/license/jamescherti/bufferwizard.el)
+# wizard.el
+![Build Status](https://github.com/jamescherti/wizard.el/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/github/license/jamescherti/wizard.el)
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
-The **bufferwizard** Emacs package offers a suite of helper functions:
-- **Highlight symbol:** `(bufferwizard-toggle-highlight-at-point)`: Toggles highlighting for the symbol at point. If a selection is active, it highlights the selected text instead. This function checks whether the symbol at point or the selected text is currently highlighted. If it is, the highlight is removed; otherwise, it is applied. (This serves as a lightweight alternative to the `highlight-symbol` package.)
-- **Replace symbol:** `(bufferwizard-replace-symbol-at-point)`: Replace occurrences of a symbol at point with a specified string.
-- **Clone buffer:** `(bufferwizard-clone-indirect-buffer)` and `(bufferwizard-clone-and-switch-to-indirect-buffer)`: These functions are enhanced versions of the built-in `clone-indirect-buffer`. They create an indirect buffer with the same content as the current buffer while preserving the point position, window start, and horizontal scroll position. This package also provides the `(bufferwizard-switch-to-base-buffer)` function, which allows switching from an indirect buffer to its corresponding base buffer. (For Evil users: These functions also prevent Evil mode search highlights from incorrectly carrying over into newly cloned indirect buffers.)
-- **Highlight TODO:** `(bufferwizard-hl-todo-mode)`: Automatically highlight codetags (such as TODO, FIXME, BUG, NOTE) in your buffers using custom font-lock rules.
-- **Paste indented text:** `(bufferwizard-paste-indented)`: Paste text from the clipboard while matching the current line's indentation. It unindents the clipboard content by removing the minimal common leading whitespace and aligns it perfectly with current physical column of the cursor.
-- **Better grep:** `(bufferwizard-grep)`: Run Grep with a clean, empty prompt. Unlike the built-in `M-x grep` command, which pre-fills the minibuffer prompt with the entire base grep command, this command allows the user to only type the search arguments. The base grep command is prepended automatically, reducing visual noise and preventing accidental modification of required grep flags.
-- **Copy unindented text:** `(bufferwizard-copy-unindented)`: Copy the active region to the clipboard (kill ring) while removing the minimal common leading whitespace from all lines. If no region is active, it automatically falls back to copying the current line without its leading indentation.
+The **wizard** Emacs package offers a suite of helper functions:
+- **Highlight symbol:** `(wizard-toggle-highlight-at-point)`: Toggles highlighting for the symbol at point. If a selection is active, it highlights the selected text instead. This function checks whether the symbol at point or the selected text is currently highlighted. If it is, the highlight is removed; otherwise, it is applied. (This serves as a lightweight alternative to the `highlight-symbol` package.)
+- **Replace symbol:** `(wizard-replace-symbol-at-point)`: Replace occurrences of a symbol at point with a specified string.
+- **Clone buffer:** `(wizard-clone-indirect-buffer)` and `(wizard-clone-and-switch-to-indirect-buffer)`: These functions are enhanced versions of the built-in `clone-indirect-buffer`. They create an indirect buffer with the same content as the current buffer while preserving the point position, window start, and horizontal scroll position. This package also provides the `(wizard-switch-to-base-buffer)` function, which allows switching from an indirect buffer to its corresponding base buffer. (For Evil users: These functions also prevent Evil mode search highlights from incorrectly carrying over into newly cloned indirect buffers.)
+- **Highlight TODO:** `(wizard-hl-todo-mode)`: Automatically highlight codetags (such as TODO, FIXME, BUG, NOTE) in your buffers using custom font-lock rules.
+- **Paste indented text:** `(wizard-paste-indented)`: Paste text from the clipboard while matching the current line's indentation. It unindents the clipboard content by removing the minimal common leading whitespace and aligns it perfectly with current physical column of the cursor.
+- **Better grep:** `(wizard-grep)`: Run Grep with a clean, empty prompt. Unlike the built-in `M-x grep` command, which pre-fills the minibuffer prompt with the entire base grep command, this command allows the user to only type the search arguments. The base grep command is prepended automatically, reducing visual noise and preventing accidental modification of required grep flags.
+- **Copy unindented text:** `(wizard-copy-unindented)`: Copy the active region to the clipboard (kill ring) while removing the minimal common leading whitespace from all lines. If no region is active, it automatically falls back to copying the current line without its leading indentation.
 - **Point navigation:**
-  - `(bufferwizard-point-backward-to-lower-indentation)` and `(bufferwizard-point-forward-to-lower-indentation)`: Move the point backward or forward to the nearest line with a lower indentation level.
-  - `(bufferwizard-point-backward-to-empty-line)` and `(bufferwizard-point-forward-to-empty-line)`: Move the point backward or forward to the nearest empty line.
-  - (Setting: When non-nil, the `bufferwizard-point-ignore-invisible` variable causes `bufferwizard-point-*` commands to skip invisible text.)
+  - `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)`: Move the point backward or forward to the nearest line with a lower indentation level.
+  - `(wizard-point-backward-to-empty-line)` and `(wizard-point-forward-to-empty-line)`: Move the point backward or forward to the nearest empty line.
+  - (Setting: When non-nil, the `wizard-point-ignore-invisible` variable causes `wizard-point-*` commands to skip invisible text.)
 - Region movement:
-  - `(bufferwizard-move-region-up)` and `(bufferwizard-move-region-down)`: Move the currently active region (selected text) up or down. These commands maintain the active selection after moving and provide support for both standard Emacs regions and Evil mode visual states.
-- `(bufferwizard-reload-current-buffer)`: Completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, which only re-reads text while preserving the underlying buffer objects, this command kills and reopens the file, and then restores the base buffer and all indirect buffers or clones. This provides a true clean slate hard reset that instantly purges broken states, glitched minor modes, or stale background tool states (such as out-of-sync LSP engine or linter markers). Any unsaved modifications are silently saved beforehand. Despite destroying the original buffer object, it takes an exact snapshot of your window coordinates before deletion to restore the precise point, window start, horizontal scroll, and pixel-exact vertical scroll. This prevents your text or display layout from shifting by even a single pixel.
+  - `(wizard-move-region-up)` and `(wizard-move-region-down)`: Move the currently active region (selected text) up or down. These commands maintain the active selection after moving and provide support for both standard Emacs regions and Evil mode visual states.
+- `(wizard-reload-current-buffer)`: Completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, which only re-reads text while preserving the underlying buffer objects, this command kills and reopens the file, and then restores the base buffer and all indirect buffers or clones. This provides a true clean slate hard reset that instantly purges broken states, glitched minor modes, or stale background tool states (such as out-of-sync LSP engine or linter markers). Any unsaved modifications are silently saved beforehand. Despite destroying the original buffer object, it takes an exact snapshot of your window coordinates before deletion to restore the precise point, window start, horizontal scroll, and pixel-exact vertical scroll. This prevents your text or display layout from shifting by even a single pixel.
 
 ## Installation
 
 ### Install with straight (Emacs version < 30)
 
-To install `bufferwizard` with `straight.el`:
+To install `wizard` with `straight.el`:
 
 1. It if hasn't already been done, [add the straight.el bootstrap code](https://github.com/radian-software/straight.el?tab=readme-ov-file#getting-started) to your init file.
 2. Add the following code to the Emacs init file:
 ```emacs-lisp
-(use-package bufferwizard
-  :straight (bufferwizard
+(use-package wizard
+  :straight (wizard
              :type git
              :host github
-             :repo "jamescherti/bufferwizard.el"))
+             :repo "jamescherti/wizard.el"))
 ```
 
 ### Installing with use-package and :vc (Built-in feature in Emacs version >= 30)
 
-To install `bufferwizard` with `use-package` and `:vc` (Emacs >= 30):
+To install `wizard` with `use-package` and `:vc` (Emacs >= 30):
 
 ``` emacs-lisp
-(use-package bufferwizard
-  :vc (:url "https://github.com/jamescherti/bufferwizard.el"
+(use-package wizard
+  :vc (:url "https://github.com/jamescherti/wizard.el"
        :rev :newest))
 ```
 
@@ -49,18 +49,18 @@ To install `bufferwizard` with `use-package` and `:vc` (Emacs >= 30):
 
 #### Codetags highlighting
 
-You can customize the codetags that get highlighted by modifying the `bufferwizard-hl-todo-keywords` variable. By default, it highlights `TODO`, `FIXME`, `BUG`, `XXX` (with warning face, which is generally red) and `NOTE`, `HACK`, `DONE` (with doc face, which is generally green).
+You can customize the codetags that get highlighted by modifying the `wizard-hl-todo-keywords` variable. By default, it highlights `TODO`, `FIXME`, `BUG`, `XXX` (with warning face, which is generally red) and `NOTE`, `HACK`, `DONE` (with doc face, which is generally green).
 
 To enable this feature globally, add the following to your Emacs configuration:
 ```elisp
-(bufferwizard-hl-todo-mode 1)
+(wizard-hl-todo-mode 1)
 ```
 
 #### Case sensitivity
 
-The functions `(bufferwizard-toggle-highlight-at-point)` and `(bufferwizard-replace-symbol-at-point)` depend on built-in functions that can be customized via the following variable:
+The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)` depend on built-in functions that can be customized via the following variable:
 
-- `case-fold-search`: This buffer-local variable determines the behavior of `(bufferwizard-toggle-highlight-at-point)` and `(bufferwizard-replace-symbol-at-point)`. When set to t (default), both symbol highlighting and searches become case-insensitive, matching symbols regardless of case. When set to nil, they become case-sensitive, matching symbols only when the case exactly matches the text in the buffer.
+- `case-fold-search`: This buffer-local variable determines the behavior of `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)`. When set to t (default), both symbol highlighting and searches become case-insensitive, matching symbols regardless of case. When set to nil, they become case-sensitive, matching symbols only when the case exactly matches the text in the buffer.
   Example:
   ```elisp
   ;; Setting case-fold-search to nil enables case-sensitive symbol highlighting
@@ -68,17 +68,17 @@ The functions `(bufferwizard-toggle-highlight-at-point)` and `(bufferwizard-repl
   (setq-default case-fold-search nil)
   ```
 
-- `case-replace`: When non-nil, this variable ensures that `(bufferwizard-replace-symbol-at-point)` preserves the case of the original text during replacements.
+- `case-replace`: When non-nil, this variable ensures that `(wizard-replace-symbol-at-point)` preserves the case of the original text during replacements.
   Example:
   ```elisp
-  ;; t means (bufferwizard-replace-symbol-at-point) should preserve case in
+  ;; t means (wizard-replace-symbol-at-point) should preserve case in
   ;; replacements.
   (setq case-replace t)
   ```
 
-### Making bufferwizard-grep use rg instead of grep
+### Making wizard-grep use rg instead of grep
 
-To make (bufferwizard-grep) use rg (ripgrep) instead of standard grep, add the following snippet to your Emacs initialization file:
+To make (wizard-grep) use rg (ripgrep) instead of standard grep, add the following snippet to your Emacs initialization file:
 
 ```elisp
 (setq grep-use-null-device nil)
@@ -105,7 +105,7 @@ To make (bufferwizard-grep) use rg (ripgrep) instead of standard grep, add the f
 
 ## Author and License
 
-The `bufferwizard` Emacs package has been written by [James Cherti](https://www.jamescherti.com/) and is distributed under terms of the GNU General Public License version 3, or, at your choice, any later version.
+The `wizard` Emacs package has been written by [James Cherti](https://www.jamescherti.com/) and is distributed under terms of the GNU General Public License version 3, or, at your choice, any later version.
 
 Copyright (C) 2024-2026 James Cherti
 
@@ -113,7 +113,7 @@ This program is free software: you can redistribute it and/or modify it under th
 
 ## Links
 
-- [bufferwizard.el @GitHub](https://github.com/jamescherti/bufferwizard.el)
+- [wizard.el @GitHub](https://github.com/jamescherti/wizard.el)
 
 Other Emacs packages by the same author:
 - [compile-angel.el](https://github.com/jamescherti/compile-angel.el): **Speed up Emacs!** This package guarantees that all .el files are both byte-compiled and native-compiled, which significantly speeds up Emacs.

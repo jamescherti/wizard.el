@@ -46,8 +46,8 @@ compile: cask
 
 .PHONY: package-lint
 package-lint:
-	cask emacs -Q --eval ${INIT_PACKAGES} -batch -f package-lint-batch-and-exit bufferwizard.el
+	cask emacs -Q --eval ${INIT_PACKAGES} -batch -f package-lint-batch-and-exit wizard.el
 
 .PHONY: test
 test:
-	if test -d tests; then cask emacs --batch -L . -L tests -l tests/test-bufferwizard.el -f ert-run-tests-batch-and-exit; else true; fi
+	if test -d tests; then cask emacs --batch -L . -L tests -l tests/test-wizard.el -f ert-run-tests-batch-and-exit; else true; fi

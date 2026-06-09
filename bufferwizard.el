@@ -1,10 +1,10 @@
-;;; bufferwizard.el --- Buffer wizard  -*- lexical-binding: t; -*-
+;;; wizard.el --- Buffer wizard  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024-2026 James Cherti | https://www.jamescherti.com/contact/
 
 ;; Author: James Cherti <https://www.jamescherti.com/contact/>
 ;; Version: 1.1.1
-;; URL: https://github.com/jamescherti/bufferwizard.el
+;; URL: https://github.com/jamescherti/wizard.el
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "26.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -23,29 +23,29 @@
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; The **bufferwizard** Emacs package provides a collection of helper functions
+;; The **wizard** Emacs package provides a collection of helper functions
 ;; and commands for managing buffers.
 
 ;;; Code:
 
 ;;; Group
 
-(defgroup bufferwizard nil
+(defgroup wizard nil
   "Buffer wizard settings and configuration."
-  :group 'bufferwizard
-  :prefix "bufferwizard-"
+  :group 'wizard
+  :prefix "wizard-"
   :link '(url-link
           :tag "Github"
-          "https://github.com/jamescherti/bufferwizard.el"))
+          "https://github.com/jamescherti/wizard.el"))
 
 ;;; Helper functions
 
-(defun bufferwizard--message (&rest args)
-  "Display a message with [bufferwizard] prepended.
+(defun wizard--message (&rest args)
+  "Display a message with [wizard] prepended.
 The message is formatted with the provided arguments ARGS."
-  (apply #'message (concat "[bufferwizard] " (car args)) (cdr args)))
+  (apply #'message (concat "[wizard] " (car args)) (cdr args)))
 
-(defun bufferwizard--get-list-buffers (filename)
+(defun wizard--get-list-buffers (filename)
   "Return a list of buffers visiting the specified FILENAME.
 
 FILENAME is the absolute path of the file to check for associated buffers.
@@ -69,9 +69,9 @@ Returns a list of buffers that are associated with FILENAME."
 ;;; Indirect buffers
 
 ;;;###autoload
-(defun bufferwizard-clone-indirect-buffer (&optional newname
-                                                     display-flag
-                                                     norecord)
+(defun wizard-clone-indirect-buffer (&optional newname
+                                               display-flag
+                                               norecord)
   "Create an indirect buffer while preserving window state.
 
 This function is an enhanced version of the built-in `clone-indirect-buffer'.
@@ -134,11 +134,11 @@ Returns the newly created indirect buffer."
     indirect-buffer))
 
 ;;;###autoload
-(defun bufferwizard-clone-and-switch-to-indirect-buffer (&optional newname
-                                                                   norecord)
+(defun wizard-clone-and-switch-to-indirect-buffer (&optional newname
+                                                             norecord)
   "Create an indirect buffer and switch to it.
 
-This function is a variant of `bufferwizard-clone-indirect-buffer', except it
+This function is a variant of `wizard-clone-indirect-buffer', except it
 also switches to the new indirect buffer.
 
 This function creates a new indirect buffer with the same content as the current
@@ -162,10 +162,10 @@ Returns the newly created indirect buffer."
      (list (if current-prefix-arg
                (read-buffer "Name of indirect buffer: " (buffer-name)))
            t)))
-  (bufferwizard-clone-indirect-buffer newname nil norecord))
+  (wizard-clone-indirect-buffer newname nil norecord))
 
 ;;;###autoload
-(defun bufferwizard-switch-to-base-buffer (&optional buffer)
+(defun wizard-switch-to-base-buffer (&optional buffer)
   "Switch to the base buffer if BUFFER is indirect.
 Preserve point, `window-start', and horizontal scrolling."
   (interactive)
@@ -196,7 +196,7 @@ Preserve point, `window-start', and horizontal scrolling."
 ;;; Search and replace (string)
 
 ;;;###autoload
-(defun bufferwizard-replace-regexp (from-regexp &optional to-string)
+(defun wizard-replace-regexp (from-regexp &optional to-string)
   "Replace occurrences of FROM-REGEXP with TO-STRING.
 When TO-STRING is not specified, the user is prompted for input.
 This function confirms each replacement."
@@ -237,14 +237,14 @@ This function confirms each replacement."
                      (eq (window-buffer window) buf))
             (set-window-start window orig-window-start t)))))))
 
-(defun bufferwizard--symbol-at-point-regexp ()
+(defun wizard--symbol-at-point-regexp ()
   "Return a regexp that matches the symbol at point."
   (when-let* ((symbol (thing-at-point 'symbol t)))
     (when symbol
       (concat "\\_<" (regexp-quote symbol) "\\_>"))))
 
 ;;;###autoload
-(defun bufferwizard-replace-symbol-at-point (&optional to-string)
+(defun wizard-replace-symbol-at-point (&optional to-string)
   "Replace occurrences of a symbol at point with a specified TO-STRING.
 When TO-STRING is not specified, the user is prompted for input.
 This function confirms each replacement."
@@ -265,7 +265,7 @@ This function confirms each replacement."
       (setq from-string (thing-at-point 'symbol t))
       (when from-string
         (setq string-start (car (bounds-of-thing-at-point 'symbol)))
-        (setq string-regexp (bufferwizard--symbol-at-point-regexp))))
+        (setq string-regexp (wizard--symbol-at-point-regexp))))
 
     (when from-string
       ;; Only apply visual highlighting if we need to prompt the user
@@ -287,26 +287,26 @@ This function confirms each replacement."
             ;; auto-indentation) can shift point and markers, causing replacements
             ;; to affect the wrong text.
             (inhibit-modification-hooks t))
-        (bufferwizard-replace-regexp string-regexp to-string)))))
+        (wizard-replace-regexp string-regexp to-string)))))
 
 ;;; Highlight symbols
 
-(defun bufferwizard-get-symbol-or-region-regexp ()
+(defun wizard-get-symbol-or-region-regexp ()
   "Return the regexp of the selected region or the default symbol at point."
   (if (use-region-p)
       (regexp-quote (buffer-substring-no-properties (region-beginning)
                                                     (region-end)))
     (find-tag-default-as-symbol-regexp)))
 
-(defun bufferwizard-highlight-p ()
+(defun wizard-highlight-p ()
   "Return non-nil if the symbol at point is currently highlighted."
   (require 'hi-lock)
   (when (fboundp 'hi-lock--regexps-at-point)
-    (when-let* ((regexp (bufferwizard-get-symbol-or-region-regexp)))
+    (when-let* ((regexp (wizard-get-symbol-or-region-regexp)))
       (member regexp (hi-lock--regexps-at-point)))))
 
 ;;;###autoload
-(defun bufferwizard-highlight-at-point ()
+(defun wizard-highlight-at-point ()
   "Highlight the symbol at point in the current buffer.
 
 This function identifies the symbol at the current point, generates the
@@ -318,7 +318,7 @@ built-in `hi-lock' package."
              (fboundp 'hi-lock-mode)
              (fboundp 'hi-lock-set-pattern))
     ;; Similar to `hi-lock-face-symbol-at-point'
-    (let* ((regexp (bufferwizard-get-symbol-or-region-regexp))
+    (let* ((regexp (wizard-get-symbol-or-region-regexp))
            (hi-lock-auto-select-face t)
            (face (hi-lock-read-face-name)))
       (ignore hi-lock-auto-select-face)
@@ -333,27 +333,27 @@ built-in `hi-lock' package."
            case-fold-search))))))
 
 ;;;###autoload
-(defun bufferwizard-unhighlight-at-point ()
+(defun wizard-unhighlight-at-point ()
   "Remove highlighting for the symbol at point."
   (interactive)
   (require 'hi-lock)
   (when (fboundp 'hi-lock-unface-buffer)
-    (when-let* ((regexp (bufferwizard-get-symbol-or-region-regexp)))
+    (when-let* ((regexp (wizard-get-symbol-or-region-regexp)))
       (hi-lock-unface-buffer regexp))))
 
 ;;;###autoload
-(defun bufferwizard-toggle-highlight-at-point ()
+(defun wizard-toggle-highlight-at-point ()
   "Toggle highlighting for the symbol at point.
 
 This function checks if the symbol at point is currently highlighted.
 If it is, it removes the highlight; otherwise, it applies the highlight."
   (interactive)
-  (if (bufferwizard-highlight-p)
-      (bufferwizard-unhighlight-at-point)
-    (bufferwizard-highlight-at-point)))
+  (if (wizard-highlight-p)
+      (wizard-unhighlight-at-point)
+    (wizard-highlight-at-point)))
 
 ;;;###autoload
-(defun bufferwizard-unhighlight ()
+(defun wizard-unhighlight ()
   "Remove highlighting of each match to REGEXP.
 Interactively, prompt for REGEXP, accepting only regexps previously inserted by
 hi-lock interactive functions. If REGEXP is t (or if \\[universal-argument] was
@@ -365,7 +365,7 @@ specified interactively), then remove all hi-lock highlighting."
 
 ;;; Highlight code tags
 
-(defcustom bufferwizard-hl-todo-keywords
+(defcustom wizard-hl-todo-keywords
   '(("TODO"   . font-lock-warning-face)
     ("FIXME"  . font-lock-warning-face)
     ("BUG"    . font-lock-warning-face)
@@ -382,20 +382,20 @@ or a symbol representing an existing face (e.g., \\='font-lock-warning-face)."
                 :value-type
                 (choice (color :tag "Hex Color (e.g., ##FF0000)")
                         (face :tag "Face Name (e.g., font-lock-doc-face)")))
-  :group 'bufferwizard)
+  :group 'wizard)
 
-(defvar bufferwizard--compiled-hl-todo-keywords nil
+(defvar wizard--compiled-hl-todo-keywords nil
   "Internal cache of compiled font-lock keywords for highlighting TODOs.")
 
-(defun bufferwizard--compile-hl-todo-keywords ()
-  "Translate `bufferwizard-hl-todo-keywords' into optimized `font-lock' regexps."
+(defun wizard--compile-hl-todo-keywords ()
+  "Translate `wizard-hl-todo-keywords' into optimized `font-lock' regexps."
   (require 'seq)
   (if (fboundp 'seq-group-by)
       (let* (;; Group the alist by the cdr (the face/color)
              ;; Result:
              ;; '((font-lock-warning-face . (("TODO" . face)
              ;;                              ("FIXME" . face))) ...)
-             (grouped-by-face (seq-group-by #'cdr bufferwizard-hl-todo-keywords))
+             (grouped-by-face (seq-group-by #'cdr wizard-hl-todo-keywords))
              compiled-rules)
 
         (dolist (group grouped-by-face)
@@ -420,22 +420,22 @@ or a symbol representing an existing face (e.g., \\='font-lock-warning-face)."
     (error "Undefined: seq-group-by")))
 
 ;;;###autoload
-(define-minor-mode bufferwizard-hl-todo-local-mode
+(define-minor-mode wizard-hl-todo-local-mode
   "Minor mode to highlight keywords like TODO, FIXME, etc.
 
 When enabled, this mode dynamically builds font-lock rules from
-the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
+the key-value pairs defined in `wizard-hl-todo-keywords'."
   :global nil
   :lighter " bw-todo"
-  :group 'bufferwizard
-  (if bufferwizard-hl-todo-local-mode
+  :group 'wizard
+  (if wizard-hl-todo-local-mode
       (progn
         ;; Compile and store the keywords so we can reliably remove them later
-        (setq bufferwizard--compiled-hl-todo-keywords
-              (bufferwizard--compile-hl-todo-keywords))
-        (font-lock-add-keywords nil bufferwizard--compiled-hl-todo-keywords t))
+        (setq wizard--compiled-hl-todo-keywords
+              (wizard--compile-hl-todo-keywords))
+        (font-lock-add-keywords nil wizard--compiled-hl-todo-keywords t))
     ;; Remove the exact keywords we previously added
-    (font-lock-remove-keywords nil bufferwizard--compiled-hl-todo-keywords))
+    (font-lock-remove-keywords nil wizard--compiled-hl-todo-keywords))
 
   ;; Refresh font-lock to apply/remove changes immediately
   (when (bound-and-true-p font-lock-mode)
@@ -445,14 +445,14 @@ the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
         (font-lock-fontify-buffer)))))
 
 ;;;###autoload
-(define-globalized-minor-mode bufferwizard-hl-todo-mode
-  bufferwizard-hl-todo-local-mode
-  (lambda () (bufferwizard-hl-todo-local-mode 1))
-  :group 'bufferwizard)
+(define-globalized-minor-mode wizard-hl-todo-mode
+  wizard-hl-todo-local-mode
+  (lambda () (wizard-hl-todo-local-mode 1))
+  :group 'wizard)
 
 ;;; Clipboard: Paste using indentation
 
-(defun bufferwizard--unindent-string (input-str)
+(defun wizard--unindent-string (input-str)
   "Unindent INPUT-STR by removing the minimal common indentation."
   (let* (;; Convert tabs to spaces in a temporary buffer to ensure raw character
          ;; counting accurately reflects visual column depth.
@@ -492,7 +492,7 @@ the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
                lines
                "\n")))
 
-(defun bufferwizard--insert-aligned ()
+(defun wizard--insert-aligned ()
   "Paste text from the clipboard with the current line's indentation."
   (let ((kill-ring-content (ignore-errors (current-kill 0))))
     (when kill-ring-content
@@ -507,10 +507,10 @@ the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
 
              ;; Prepare the raw clipboard text by stripping its original
              ;; formatting.
-             (text (bufferwizard--unindent-string (string-trim-right
-                                                   (substring-no-properties
-                                                    kill-ring-content)
-                                                   "\n")))
+             (text (wizard--unindent-string (string-trim-right
+                                             (substring-no-properties
+                                              kill-ring-content)
+                                             "\n")))
 
              ;; Construct the final string that will be inserted into the
              ;; buffer.
@@ -523,7 +523,7 @@ the key-value pairs defined in `bufferwizard-hl-todo-keywords'."
           (insert text-to-paste))))))
 
 ;;;###autoload
-(defun bufferwizard-paste-indented ()
+(defun wizard-paste-indented ()
   "Paste text from the clipboard with the current line's indentation.
 It unindents the clipboard content by removing the minimal common leading
 whitespace and aligns it perfectly with the cursor's current physical column.
@@ -535,12 +535,12 @@ original position prior to the paste operation."
         (when content
           (insert content)))
     (save-excursion
-      (bufferwizard--insert-aligned))))
+      (wizard--insert-aligned))))
 
 ;;; Clipboard: Copy without indentation
 
 ;;;###autoload
-(defun bufferwizard-copy-unindented ()
+(defun wizard-copy-unindented ()
   "Copy the active region or current line with base indentation removed.
 If a region is active, copy the text within the region. Otherwise, copy the
 current line.
@@ -554,31 +554,31 @@ blocks of code without preserving their original structural indentation."
          (start (car bounds))
          (end (cdr bounds))
          (text (buffer-substring-no-properties start end))
-         (unindented-text (bufferwizard--unindent-string text)))
+         (unindented-text (wizard--unindent-string text)))
     (kill-new unindented-text)))
 
 ;;; Point movement
 
-(defcustom bufferwizard-point-ignore-invisible t
+(defcustom wizard-point-ignore-invisible t
   "Non-nil means point movement functions ignore invisible text.
 When set to a non-nil value, functions such as
-`bufferwizard-point-forward-to-empty-line' and
-`bufferwizard-point-backward-to-lower-indentation' will skip over lines that are
+`wizard-point-forward-to-empty-line' and
+`wizard-point-backward-to-lower-indentation' will skip over lines that are
 currently hidden or invisible. If set to nil, invisible text is included and
 evaluated during point movement searches."
   :type 'boolean
-  :group 'bufferwizard)
+  :group 'wizard)
 
-(defun bufferwizard--point-keep-searching-until-empty (_initial-indentation)
+(defun wizard--point-keep-searching-until-empty (_initial-indentation)
   "Return t when the current line is NOT empty."
   (not (looking-at-p "^\\s-*$")))
 
-(defun bufferwizard--point-keep-searching-until-indent-lower (initial-indentation)
+(defun wizard--point-keep-searching-until-indent-lower (initial-indentation)
   "Return t when the indentation is >= INITIAL-INDENTATION, or the line is empty."
   (or (looking-at-p "^\\s-*$")
       (>= (current-indentation) initial-indentation)))
 
-(defun bufferwizard--point-find-pos (direction func-keep-searching)
+(defun wizard--point-find-pos (direction func-keep-searching)
   "Get the buffer position of the previous/next line with lower indentation.
 DIRECTION is 1 for forward, -1 for backward.
 FUNC-KEEP-SEARCHING is a predicate function called with the initial indentation.
@@ -595,14 +595,14 @@ Return nil if no matching line is found."
                            (eobp)
                          (bobp)))
                   (zerop (forward-line direction)))
-        (unless (or (and bufferwizard-point-ignore-invisible
+        (unless (or (and wizard-point-ignore-invisible
                          (invisible-p (point)))
                     (funcall func-keep-searching initial-indentation))
           (setq found t)))
       (when found
         (point)))))
 
-(defun bufferwizard--point-move (direction func-keep-searching)
+(defun wizard--point-move (direction func-keep-searching)
   "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
 DIRECTION > 0 moves forward; < 0 moves backward."
   (let* ((region (use-region-p))
@@ -623,8 +623,8 @@ DIRECTION > 0 moves forward; < 0 moves backward."
       ;; cursor movement or region updates made within the function.
       (evil-exit-visual-state))
 
-    (setq target-pos (bufferwizard--point-find-pos direction
-                                                   func-keep-searching))
+    (setq target-pos (wizard--point-find-pos direction
+                                             func-keep-searching))
 
     (when target-pos
       (if (not region)
@@ -642,41 +642,41 @@ DIRECTION > 0 moves forward; < 0 moves backward."
           (activate-mark))))))
 
 ;;;###autoload
-(defun bufferwizard-point-backward-to-lower-indentation ()
+(defun wizard-point-backward-to-lower-indentation ()
   "Move backward to the lower indentation."
   (interactive)
-  (bufferwizard--point-move
-   -1 #'bufferwizard--point-keep-searching-until-indent-lower))
+  (wizard--point-move
+   -1 #'wizard--point-keep-searching-until-indent-lower))
 
 ;;;###autoload
-(defun bufferwizard-point-forward-to-lower-indentation ()
+(defun wizard-point-forward-to-lower-indentation ()
   "Move forward to the lower indentation."
   (interactive)
-  (bufferwizard--point-move
-   1 #'bufferwizard--point-keep-searching-until-indent-lower))
+  (wizard--point-move
+   1 #'wizard--point-keep-searching-until-indent-lower))
 
 ;;;###autoload
-(defun bufferwizard-point-backward-to-empty-line ()
+(defun wizard-point-backward-to-empty-line ()
   "Move backward to empty line."
   (interactive)
-  (bufferwizard--point-move
-   -1 #'bufferwizard--point-keep-searching-until-empty))
+  (wizard--point-move
+   -1 #'wizard--point-keep-searching-until-empty))
 
 ;;;###autoload
-(defun bufferwizard-point-forward-to-empty-line ()
+(defun wizard-point-forward-to-empty-line ()
   "Move forward to empty line."
   (interactive)
-  (bufferwizard--point-move
-   1 #'bufferwizard--point-keep-searching-until-empty))
+  (wizard--point-move
+   1 #'wizard--point-keep-searching-until-empty))
 
 ;;; Move region
 
-(defcustom bufferwizard-move-region-skip-invisible t
+(defcustom wizard-move-region-skip-invisible t
   "Non-nil means moving the region will skip invisible lines."
   :type 'boolean
-  :group 'bufferwizard)
+  :group 'wizard)
 
-(defun bufferwizard-move-region (n)
+(defun wizard-move-region (n)
   "Move the current region up or down by N lines."
   (when (use-region-p)
     (let ((start (region-beginning))
@@ -692,7 +692,7 @@ DIRECTION > 0 moves forward; < 0 moves backward."
         (evil-exit-visual-state))
 
       (let ((line-text (delete-and-extract-region start end)))
-        (if bufferwizard-move-region-skip-invisible
+        (if wizard-move-region-skip-invisible
             (forward-visible-line n)
           (forward-line n))
         (let ((start (point)))
@@ -717,23 +717,23 @@ DIRECTION > 0 moves forward; < 0 moves backward."
           (activate-mark))))))
 
 ;;;###autoload
-(defun bufferwizard-move-region-up (&optional count)
+(defun wizard-move-region-up (&optional count)
   "Move the current region up by COUNT lines.
 If COUNT is omitted, it defaults to 1."
   (interactive "p")
-  (bufferwizard-move-region (- (or count 1))))
+  (wizard-move-region (- (or count 1))))
 
 ;;;###autoload
-(defun bufferwizard-move-region-down (&optional count)
+(defun wizard-move-region-down (&optional count)
   "Move the current region down by COUNT lines.
 If COUNT is omitted, it defaults to 1."
   (interactive "p")
-  (bufferwizard-move-region (or count 1)))
+  (wizard-move-region (or count 1)))
 
 ;;; Alternative to `grep'
 
 ;;;###autoload
-(defun bufferwizard-grep (command-args)
+(defun wizard-grep (command-args)
   "Run Grep with user-specified COMMAND-ARGS.
 The output from the command goes to the \"*grep*\" buffer.
 
@@ -814,7 +814,7 @@ history (or into `grep-command' if that history list is empty)."
 
 ;;; Reload buffer
 
-(defun bufferwizard-reload-current-buffer ()
+(defun wizard-reload-current-buffer ()
   "Reload the current buffer from disk, preserving its exact window state.
 
 Unlike the standard `revert-buffer', which only replaces text while retaining
@@ -914,6 +914,6 @@ If called interactively, it displays a message confirming the reload."
             (message "Reloaded: %s" (abbreviate-file-name file))))))))
 
 ;;; Provide
-(provide 'bufferwizard)
+(provide 'wizard)
 
-;;; bufferwizard.el ends here
+;;; wizard.el ends here

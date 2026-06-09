@@ -1,4 +1,4 @@
 (source gnu)
 (source melpa)
 
-(package-file "bufferwizard.el")
+(package-file "wizard.el")
