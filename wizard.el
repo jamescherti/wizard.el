@@ -311,7 +311,7 @@ This function confirms each replacement."
 
 This function identifies the symbol at the current point, generates the
 appropriate regular expression for it, and applies highlighting using the
-built-in `hi-lock' package."
+built-in `hi-lock' package without prompting for a face."
   (interactive)
   (require 'hi-lock)
   (when (and (fboundp 'hi-lock-read-face-name)
@@ -319,7 +319,11 @@ built-in `hi-lock' package."
              (fboundp 'hi-lock-set-pattern))
     ;; Similar to `hi-lock-face-symbol-at-point'
     (let* ((regexp (wizard-get-symbol-or-region-regexp))
+           ;; Force the automatic selection of a face
            (hi-lock-auto-select-face t)
+           ;; This is necessary to force the automatic selection of a face every
+           ;; single time, regardless of how the user invokes the command.
+           (current-prefix-arg nil)
            (face (hi-lock-read-face-name)))
       (ignore hi-lock-auto-select-face)
       (when regexp
