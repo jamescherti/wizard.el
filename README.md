@@ -10,7 +10,7 @@ The philosophy behind this package is simple: **leverage the robust APIs Emacs a
 ## Features Overview
 
 ### Visuals & Highlighting
-- **Lightweight symbol highlight:** `(wizard-toggle-highlight-at-point)` toggles highlighting for the symbol under your cursor or the active selection. It is a fast, dependency-free alternative to the *highlight-symbol* package.
+- **Symbol highlight:** `(wizard-toggle-highlight-at-point)` toggles highlighting for the symbol under your cursor or the active selection. It is a lightweight alternative to the *highlight-symbol* package.
 - **Native TODO highlighting:** `(wizard-hl-todo-mode 1)` automatically highlights codetags **TODO, FIXME, BUG, NOTE**, etc. in your buffers using custom font-lock rules. This mode is an alternative to the *hl-todo* package that uses Emacs built-in `hi-lock`.
 
 ### Buffer & State Management
