@@ -1,5 +1,5 @@
 # wizard.el - A Lightweight Suite of Useful Emacs Functions
-![Build Status](https://github.com/jamescherti/wizard.el/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://github.com/jamescherti/wizard.el/actions/workflows/melpazoid.yml/badge.svg)
 ![License](https://img.shields.io/github/license/jamescherti/wizard.el)
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
