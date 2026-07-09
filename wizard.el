@@ -409,7 +409,7 @@ or a symbol representing an existing face (e.g., \\='font-lock-warning-face)."
 
                  ;; regexp-opt safely escapes and builds the fastest possible
                  ;; OR-regexp
-                 (regexp (concat "\\_<\\(" (regexp-opt keywords) "\\)\\_>"))
+                 (regexp (concat "\\<\\(" (regexp-opt keywords) "\\)\\>"))
 
                  ;; Dynamically determine the face property
                  (face-prop (if (stringp color-or-face)
