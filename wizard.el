@@ -305,6 +305,11 @@ This function confirms each replacement."
     (when-let* ((regexp (wizard-get-symbol-or-region-regexp)))
       (member regexp (hi-lock--regexps-at-point)))))
 
+;; Fixes an issue that occurs because wizard.el enables lexical binding at the
+;; top of the file (-*- lexical-binding: t; -*-), but hi-lock-auto-select-face
+;; is a dynamically scoped variable defined in hi-lock.el.
+(defvar hi-lock-auto-select-face)
+
 ;;;###autoload
 (defun wizard-highlight-at-point ()
   "Highlight the symbol at point in the current buffer.
