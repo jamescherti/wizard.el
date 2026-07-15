@@ -330,7 +330,6 @@ built-in `hi-lock' package without prompting for a face."
            ;; single time, regardless of how the user invokes the command.
            (current-prefix-arg nil)
            (face (hi-lock-read-face-name)))
-      (ignore hi-lock-auto-select-face)
       (when regexp
         (or (facep face) (setq face 'hi-yellow))
         (unless (bound-and-true-p hi-lock-mode)
