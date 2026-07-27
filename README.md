@@ -10,23 +10,29 @@ The philosophy behind this package is simple: **leverage the robust APIs Emacs a
 ## Features Overview
 
 ### Visuals & Highlighting
+
 - **Symbol highlight:** `(wizard-toggle-highlight-at-point)` toggles highlighting for the symbol under your cursor or the active selection. It is a lightweight alternative to the *highlight-symbol* package.
 - **Native TODO highlighting:** `(wizard-hl-todo-mode 1)` automatically highlights codetags **TODO, FIXME, BUG, NOTE**, etc. in your buffers using custom font-lock rules. This mode is an alternative to the *hl-todo* package that uses Emacs built-in `hi-lock`.
 
 ### Buffer & State Management
+
 - **True hard reset:** `(wizard-reload-current-buffer)` completely reloads the current buffer from disk. Unlike the standard `revert-buffer`, this command kills and reopens the file, instantly purging broken states, glitched minor modes, or out-of-sync LSP servers. It silently saves your work first and takes an exact snapshot of your window coordinates to restore your point, window start, and pixel-exact scroll position. Your layout will not shift by a single pixel.
 - **Enhanced buffer cloning:** `(wizard-clone-indirect-buffer)` and `(wizard-clone-and-switch-to-indirect-buffer)` improve the built-in clone function. They preserve your point position, window start, and horizontal scroll. Evil users also benefit, as these functions prevent Evil mode search highlights from bleeding into newly cloned indirect buffers. Switch back easily with `(wizard-switch-to-base-buffer)`.
 
 ### Smart Text Manipulation
+
 - **Paste with matching indentation:** `(wizard-paste-indented)` pastes text from your clipboard while automatically matching the current line's indentation. It removes the minimal common leading whitespace from the clipboard content and aligns it perfectly with your cursor.
 - **Copy unindented text:** `(wizard-copy-unindented)` copies the active region while stripping away minimal common leading whitespace. If no region is active, it copies the current line without its leading indentation.
-- **Shift regions easily:** `(wizard-move-region-up)` and `(wizard-move-region-down)` move the currently selected text up or down. These commands maintain the active selection after moving and support both standard Emacs regions and Evil mode visual states.
+- **Shift regions easily:** `(wizard-move-region-up)` and `(wizard-move-region-down)` move the currently selected text up or down. These commands maintain the active selection after moving and support both standard Emacs regions and Evil mode visual states. Setting the `wizard-move-region-skip-invisible` variable to a non-nil value ensures that moving the region skips over hidden or invisible lines.
 
 ### Search & Replace
+
 - **Noise-free Grep:** `(wizard-grep)` runs Grep with a clean, empty prompt. Unlike the built-in `M-x grep` which pre-fills the minibuffer with the entire shell command, this command lets you type only your search arguments. The base command is prepended automatically, reducing visual noise and preventing accidental edits to your flags.
 - **Quick symbol replacement:** `(wizard-replace-symbol-at-point)` lets you instantly replace all occurrences of the symbol under your cursor with a specified string.
+- **Unrestricted replacements:** You can configure replacements to execute across the entire file, ignoring any active narrowing restrictions, by setting `wizard-replace-ignore-narrowing` to a non-nil value.
 
 ### Code Navigation
+
 - **Indentation jumping:** `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)` move your point to the nearest line with a lower indentation level, making it easy to navigate out of nested code blocks.
 - **Empty line jumping:** `(wizard-point-backward-to-empty-line)` and `(wizard-point-forward-to-empty-line)` quickly jump to the nearest blank line.
 - **Ignore invisible text:** Setting `wizard-point-ignore-invisible` to a non-nil value allows these navigation commands to skip folded or hidden text.
@@ -39,6 +45,7 @@ To install `wizard` with `straight.el`:
 
 1. It if hasn't already been done, [add the straight.el bootstrap code](https://github.com/radian-software/straight.el?tab=readme-ov-file#getting-started) to your init file.
 2. Add the following code to the Emacs init file:
+
 ```emacs-lisp
 (use-package wizard
   :straight (wizard
@@ -58,6 +65,14 @@ To install `wizard` using the built-in `:vc` keyword:
 ```
 
 ## Customizations
+
+### Search and Replace Narrowing
+
+You can allow replacements to process the entire file even if you are currently narrowed to a specific block of code:
+
+```elisp
+(setq wizard-replace-ignore-narrowing t)
+```
 
 ### Codetags highlighting
 
@@ -82,6 +97,7 @@ The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-a
   ;; and search/replace
   (setq-default case-fold-search nil)
   ```
+
 
 - `case-replace`: When non-nil, this variable ensures that `(wizard-replace-symbol-at-point)` preserves the case of the original text during replacements.
   Example:
@@ -128,6 +144,7 @@ This program is free software: you can redistribute it and/or modify it under th
 - [wizard.el @GitHub](https://github.com/jamescherti/wizard.el)
 
 Other Emacs packages by the same author:
+
 - [compile-angel.el](https://github.com/jamescherti/compile-angel.el): **Speed up Emacs!** This package guarantees that all .el files are both byte-compiled and native-compiled, which significantly speeds up Emacs.
 - [outline-indent.el](https://github.com/jamescherti/outline-indent.el): An Emacs package that provides a minor mode that enables code folding and outlining based on indentation levels for various indentation-based text files, such as YAML, Python, and other indented text files.
 - [easysession.el](https://github.com/jamescherti/easysession.el): Easysession is lightweight Emacs session manager that can persist and restore file editing buffers, indirect buffers/clones, Dired buffers, the tab-bar, and the Emacs frames (with or without the Emacs frames size, width, and height).

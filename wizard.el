@@ -38,6 +38,51 @@
           :tag "Github"
           "https://github.com/jamescherti/wizard.el"))
 
+;;; Customizations
+
+(defcustom wizard-replace-ignore-narrowing nil
+  "When non-nil, ignore any narrowing restrictions during replacements.
+In other words, perform the substitution in the scope it would have
+applied to if narrowing was not in effect. This allows users to execute
+replacements across the entire file even if they are currently narrowed
+to a specific block of code."
+  :type 'boolean
+  :group 'wizard)
+
+(defcustom wizard-hl-todo-keywords
+  '(("TODO"   . font-lock-warning-face)
+    ("FIXME"  . font-lock-warning-face)
+    ("BUG"    . font-lock-warning-face)
+    ("XXX"    . font-lock-warning-face)
+    ("DONE"   . font-lock-doc-face)
+    ("HACK"   . font-lock-doc-face)
+    ("NOTE"   . font-lock-doc-face))
+  "Alist of keywords to highlight and their corresponding colors or faces.
+Each element is a cons cell: (KEYWORD . COLOR-OR-FACE).
+- KEYWORD is a string representing the tag (e.g., \"TODO\").
+- COLOR-OR-FACE is either a string specifying a hex color (e.g., \"#FF0000\")
+or a symbol representing an existing face (e.g., \\='font-lock-warning-face)."
+  :type '(alist :key-type string
+                :value-type
+                (choice (color :tag "Hex Color (e.g., ##FF0000)")
+                        (face :tag "Face Name (e.g., font-lock-doc-face)")))
+  :group 'wizard)
+
+(defcustom wizard-point-ignore-invisible t
+  "Non-nil means point movement functions ignore invisible text.
+When set to a non-nil value, functions such as
+`wizard-point-forward-to-empty-line' and
+`wizard-point-backward-to-lower-indentation' will skip over lines that are
+currently hidden or invisible. If set to nil, invisible text is included and
+evaluated during point movement searches."
+  :type 'boolean
+  :group 'wizard)
+
+(defcustom wizard-move-region-skip-invisible t
+  "Non-nil means moving the region will skip invisible lines."
+  :type 'boolean
+  :group 'wizard)
+
 ;;; Helper functions
 
 (defun wizard--message (&rest args)
@@ -212,30 +257,33 @@ This function confirms each replacement."
          (scroll-conservatively 10)
          (search-invisible t))
     (save-excursion
-      (let ((undo-handle (prepare-change-group))
-            ;; Don't truncate any undo data in the middle of this, otherwise
-            ;; Emacs might truncate part of the resulting undo step.
-            (undo-outer-limit nil)
-            (undo-limit most-positive-fixnum)
-            (undo-strong-limit most-positive-fixnum)
-            (start (point)))
-        (unwind-protect
-            (progn
-              (activate-change-group undo-handle)
-              ;; Replace from the current position
-              (query-replace-regexp from-regexp to-string nil start (point-max))
-              ;; Replace from the beginning
-              (when (> start (point-min))
-                (query-replace-regexp
-                 from-regexp to-string nil (point-min) (1- start))))
-          (accept-change-group undo-handle)
-          (undo-amalgamate-change-group undo-handle)
-          ;; Sound restoration check: Is the window alive and still holding our
-          ;; buffer?
-          (when (and orig-window-start
-                     (window-live-p window)
-                     (eq (window-buffer window) buf))
-            (set-window-start window orig-window-start t)))))))
+      (save-restriction
+        (when wizard-replace-ignore-narrowing
+          (widen))
+        (let ((undo-handle (prepare-change-group))
+              ;; Don't truncate any undo data in the middle of this, otherwise
+              ;; Emacs might truncate part of the resulting undo step.
+              (undo-outer-limit nil)
+              (undo-limit most-positive-fixnum)
+              (undo-strong-limit most-positive-fixnum)
+              (start (point)))
+          (unwind-protect
+              (progn
+                (activate-change-group undo-handle)
+                ;; Replace from the current position
+                (query-replace-regexp from-regexp to-string nil start (point-max))
+                ;; Replace from the beginning
+                (when (> start (point-min))
+                  (query-replace-regexp
+                   from-regexp to-string nil (point-min) (1- start))))
+            (accept-change-group undo-handle)
+            (undo-amalgamate-change-group undo-handle)
+            ;; Sound restoration check: Is the window alive and still holding our
+            ;; buffer?
+            (when (and orig-window-start
+                       (window-live-p window)
+                       (eq (window-buffer window) buf))
+              (set-window-start window orig-window-start t))))))))
 
 (defun wizard--symbol-at-point-regexp ()
   "Return a regexp that matches the symbol at point."
@@ -244,11 +292,15 @@ This function confirms each replacement."
       (concat "\\_<" (regexp-quote symbol) "\\_>"))))
 
 ;;;###autoload
-(defun wizard-replace-symbol-at-point (&optional to-string)
+(defun wizard-replace-symbol-at-point (&optional to-string fixed-case)
   "Replace occurrences of a symbol at point with a specified TO-STRING.
 When TO-STRING is not specified, the user is prompted for input.
-This function confirms each replacement."
-  (interactive)
+This function confirms each replacement.
+
+If FIXED-CASE is non-nil (or if called with a prefix argument), `case-replace`
+is bound to nil via a let block, ensuring the replacement string is
+inserted exactly as typed without Emacs trying to guess the capitalization."
+  (interactive (list nil current-prefix-arg))
   (when buffer-read-only
     (error "The buffer '%s' is read-only" (buffer-name)))
   (let ((region (use-region-p))
@@ -286,7 +338,8 @@ This function confirms each replacement."
             ;; replacement. Without this, asynchronous changes (like
             ;; auto-indentation) can shift point and markers, causing replacements
             ;; to affect the wrong text.
-            (inhibit-modification-hooks t))
+            (inhibit-modification-hooks t)
+            (case-replace (if fixed-case nil case-replace)))
         (wizard-replace-regexp string-regexp to-string)))))
 
 ;;; Highlight symbols
@@ -372,25 +425,6 @@ specified interactively), then remove all hi-lock highlighting."
     (call-interactively #'hi-lock-unface-buffer)))
 
 ;;; Highlight code tags
-
-(defcustom wizard-hl-todo-keywords
-  '(("TODO"   . font-lock-warning-face)
-    ("FIXME"  . font-lock-warning-face)
-    ("BUG"    . font-lock-warning-face)
-    ("XXX"    . font-lock-warning-face)
-    ("DONE"   . font-lock-doc-face)
-    ("HACK"   . font-lock-doc-face)
-    ("NOTE"   . font-lock-doc-face))
-  "Alist of keywords to highlight and their corresponding colors or faces.
-Each element is a cons cell: (KEYWORD . COLOR-OR-FACE).
-- KEYWORD is a string representing the tag (e.g., \"TODO\").
-- COLOR-OR-FACE is either a string specifying a hex color (e.g., \"#FF0000\")
-or a symbol representing an existing face (e.g., \\='font-lock-warning-face)."
-  :type '(alist :key-type string
-                :value-type
-                (choice (color :tag "Hex Color (e.g., ##FF0000)")
-                        (face :tag "Face Name (e.g., font-lock-doc-face)")))
-  :group 'wizard)
 
 (defvar wizard--compiled-hl-todo-keywords nil
   "Internal cache of compiled font-lock keywords for highlighting TODOs.")
@@ -567,16 +601,6 @@ blocks of code without preserving their original structural indentation."
 
 ;;; Point movement
 
-(defcustom wizard-point-ignore-invisible t
-  "Non-nil means point movement functions ignore invisible text.
-When set to a non-nil value, functions such as
-`wizard-point-forward-to-empty-line' and
-`wizard-point-backward-to-lower-indentation' will skip over lines that are
-currently hidden or invisible. If set to nil, invisible text is included and
-evaluated during point movement searches."
-  :type 'boolean
-  :group 'wizard)
-
 (defun wizard--point-keep-searching-until-empty (_initial-indentation)
   "Return t when the current line is NOT empty."
   (not (looking-at-p "^\\s-*$")))
@@ -678,11 +702,6 @@ DIRECTION > 0 moves forward; < 0 moves backward."
    1 #'wizard--point-keep-searching-until-empty))
 
 ;;; Move region
-
-(defcustom wizard-move-region-skip-invisible t
-  "Non-nil means moving the region will skip invisible lines."
-  :type 'boolean
-  :group 'wizard)
 
 (defun wizard-move-region (n)
   "Move the current region up or down by N lines."
