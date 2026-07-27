@@ -865,7 +865,7 @@ If called interactively, it displays a message confirming the reload."
       (user-error "Current buffer is not visiting a file"))
 
     (unless (file-exists-p file)
-      (error "The file doesn't exist: %s" file))
+      (user-error "The file doesn't exist: %s" file))
 
     (let* ((inhibit-redisplay t)
            (indirect-buffers
