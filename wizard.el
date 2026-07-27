@@ -862,7 +862,7 @@ If called interactively, it displays a message confirming the reload."
          (base-buffer (or (buffer-base-buffer orig-buffer) orig-buffer))
          (file (buffer-file-name base-buffer)))
     (unless file
-      (error "Current buffer is not visiting a file"))
+      (user-error "Current buffer is not visiting a file"))
 
     (unless (file-exists-p file)
       (error "The file doesn't exist: %s" file))
