@@ -591,7 +591,12 @@ common leading whitespace from all copied lines. This allows you to extract
 blocks of code without preserving their original structural indentation."
   (interactive)
   (let* ((bounds (if (use-region-p)
-                     (cons (region-beginning) (region-end))
+                     ;; Expand the region to the beginning of the line to capture
+                     ;; the correct leading whitespace of the first line.
+                     (cons (save-excursion
+                             (goto-char (region-beginning))
+                             (line-beginning-position))
+                           (region-end))
                    (cons (line-beginning-position) (line-end-position))))
          (start (car bounds))
          (end (cdr bounds))
