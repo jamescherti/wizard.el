@@ -483,8 +483,7 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
   (when (bound-and-true-p font-lock-mode)
     (if (fboundp 'font-lock-flush)
         (font-lock-flush)
-      (with-no-warnings
-        (font-lock-fontify-buffer)))))
+      (font-lock-ensure))))
 
 ;;;###autoload
 (define-globalized-minor-mode wizard-hl-todo-mode
@@ -536,7 +535,9 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
 
 (defun wizard--insert-aligned ()
   "Paste text from the clipboard with the current line's indentation."
-  (let ((kill-ring-content (ignore-errors (current-kill 0))))
+  (let ((kill-ring-content (condition-case nil
+                               (current-kill 0)
+                             (error nil))))
     (when kill-ring-content
       ;; Clear the active region first so that the destination column depth
       ;; is evaluated from the true post-deletion insertion point.
@@ -573,7 +574,9 @@ If called outside the minibuffer, the cursor (point) is safely restored to its
 original position prior to the paste operation."
   (interactive)
   (if (minibufferp)
-      (let ((content (ignore-errors (current-kill 0))))
+      (let ((content (condition-case nil
+                         (current-kill 0)
+                       (error nil))))
         (when content
           (insert content)))
     (save-excursion
