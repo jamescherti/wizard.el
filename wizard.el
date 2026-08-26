@@ -5,7 +5,7 @@
 ;; Author: James Cherti <https://www.jamescherti.com/contact/>
 ;; Version: 1.1.1
 ;; URL: https://github.com/jamescherti/wizard.el
-;; Keywords: convenience
+;; Keywords: convenience, tools, matching
 ;; Package-Requires: ((emacs "26.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,7 +32,7 @@
 
 (defgroup wizard nil
   "Buffer wizard settings and configuration."
-  :group 'wizard
+  :group 'convenience
   :prefix "wizard-"
   :link '(url-link
           :tag "Github"
