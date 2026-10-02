@@ -584,6 +584,15 @@ original position prior to the paste operation."
 
 ;;; Clipboard: Copy without indentation
 
+(declare-function pos-bol nil)
+(declare-function pos-eol nil)
+
+(defalias 'wizard--pos-bol
+  (if (fboundp 'pos-bol) #'pos-bol #'line-beginning-position))
+
+(defalias 'wizard--pos-eol
+  (if (fboundp 'pos-eol) #'pos-eol #'line-end-position))
+
 ;;;###autoload
 (defun wizard-copy-unindented ()
   "Copy the active region or current line with base indentation removed.
@@ -598,9 +607,10 @@ blocks of code without preserving their original structural indentation."
                      ;; the correct leading whitespace of the first line.
                      (cons (save-excursion
                              (goto-char (region-beginning))
-                             (line-beginning-position))
+                             (wizard--pos-bol))
                            (region-end))
-                   (cons (line-beginning-position) (line-end-position))))
+                   (cons (wizard--pos-bol)
+                         (wizard--pos-eol))))
          (start (car bounds))
          (end (cdr bounds))
          (text (buffer-substring-no-properties start end))
