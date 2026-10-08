@@ -3,7 +3,7 @@
 ;; Copyright (C) 2024-2026 James Cherti | https://www.jamescherti.com/contact/
 
 ;; Author: James Cherti <https://www.jamescherti.com/contact/>
-;; Version: 1.1.2
+;; Version: 1.1.3
 ;; URL: https://github.com/jamescherti/wizard.el
 ;; Keywords: convenience, tools, matching
 ;; Package-Requires: ((emacs "26.1"))
