@@ -92,22 +92,27 @@ This mode is an alternative to the *hl-todo* package that uses Emacs built-in `h
 
 The functions `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)` depend on built-in functions that can be customized via the following variables:
 
-- `case-fold-search`: This buffer-local variable determines the behavior of `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)`. When set to t (default), both symbol highlighting and searches become case-insensitive, matching symbols regardless of case. When set to nil, they become case-sensitive, matching symbols only when the case exactly matches the text in the buffer.
-  Example:
-  ```elisp
-  ;; Setting case-fold-search to nil enables case-sensitive symbol highlighting
-  ;; and search/replace
-  (setq-default case-fold-search nil)
-  ```
+#### case-fold-search
 
+The `case-fold-search` buffer-local variable determines the behavior of `(wizard-toggle-highlight-at-point)` and `(wizard-replace-symbol-at-point)`. When set to t (default), both symbol highlighting and searches become case-insensitive, matching symbols regardless of case. When set to nil, they become case-sensitive, matching symbols only when the case exactly matches the text in the buffer.
 
-- `case-replace`: When non-nil, this variable ensures that `(wizard-replace-symbol-at-point)` preserves the case of the original text during replacements.
-  Example:
-  ```elisp
-  ;; t means (wizard-replace-symbol-at-point) should preserve case in
-  ;; replacements.
-  (setq case-replace t)
-  ```
+Example:
+```elisp
+;; Setting case-fold-search to nil enables case-sensitive symbol highlighting
+;; and search/replace
+(setq-default case-fold-search nil)
+```
+
+#### case-replace
+
+When non-nil, the `case-replace` variable ensures that `(wizard-replace-symbol-at-point)` preserves the case of the original text during replacements.
+
+Example:
+```elisp
+;; t means (wizard-replace-symbol-at-point) should preserve case in
+;; replacements.
+(setq case-replace t)
+```
 
 ### Making wizard-grep use rg (ripgrep) instead of grep
 
