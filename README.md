@@ -41,6 +41,16 @@ Instead of rewriting complex logic from scratch or adding heavy external depende
 
 ## Installation
 
+### Installing with use-package and :vc (Emacs version >= 30)
+
+To install `wizard` using the built-in `:vc` keyword:
+
+```emacs-lisp
+(use-package wizard
+  :vc (:url "https://github.com/jamescherti/wizard.el"
+       :rev :newest))
+```
+
 ### Install with straight (Emacs version < 30)
 
 To install `wizard` with `straight.el`:
@@ -54,16 +64,6 @@ To install `wizard` with `straight.el`:
              :type git
              :host github
              :repo "jamescherti/wizard.el"))
-```
-
-### Installing with use-package and :vc (Emacs version >= 30)
-
-To install `wizard` using the built-in `:vc` keyword:
-
-```emacs-lisp
-(use-package wizard
-  :vc (:url "https://github.com/jamescherti/wizard.el"
-       :rev :newest))
 ```
 
 ## Customizations
