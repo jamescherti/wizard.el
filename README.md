@@ -5,7 +5,9 @@
 
 The [**wizard**](https://github.com/jamescherti/wizard.el) Emacs package provides a collection of useful Emacs functions.
 
-The philosophy behind this package is simple: **use the APIs Emacs already provides.** Instead of rewriting complex logic from scratch or adding heavy external dependencies, **wizard** uses built-in Emacs functions to deliver practical features. (For example, to highlighting `TODO`, it uses the built-in `hi-lock`)
+The philosophy behind this package is simple: **use the APIs Emacs already provides.**
+
+Instead of rewriting complex logic from scratch or adding heavy external dependencies, **wizard** uses built-in Emacs functions to deliver practical features. (For example, to highlighting `TODO`, it uses the built-in `hi-lock`)
 
 ## Features Overview
 
