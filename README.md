@@ -3,9 +3,9 @@
 ![License](https://img.shields.io/github/license/jamescherti/wizard.el)
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
-The [**wizard**](https://github.com/jamescherti/wizard.el) Emacs package provides a curated collection of quality-of-life enhancements for your daily editing workflow.
+The [**wizard**](https://github.com/jamescherti/wizard.el) Emacs package provides a collection of useful Emacs functions.
 
-The philosophy behind this package is simple: **leverage the robust APIs Emacs already provides.** Instead of rewriting complex logic from scratch or adding heavy external dependencies, **wizard** intelligently wraps and extends built-in Emacs functions to deliver practical features.
+The philosophy behind this package is simple: **use the APIs Emacs already provides.** Instead of rewriting complex logic from scratch or adding heavy external dependencies, **wizard** uses built-in Emacs functions to deliver practical features. (For example, to highlighting `TODO`, it uses the built-in `hi-lock`)
 
 ## Features Overview
 
