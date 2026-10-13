@@ -30,8 +30,7 @@ Instead of rewriting complex logic from scratch or adding heavy external depende
 ### Search & Replace
 
 - **Noise-free Grep:** `(wizard-grep)` runs Grep with a clean, empty prompt. Unlike the built-in `M-x grep` which pre-fills the minibuffer with the entire shell command, this command lets you type only your search arguments. The base command is prepended automatically, reducing visual noise and preventing accidental edits to your flags.
-- **Quick symbol replacement:** `(wizard-replace-symbol-at-point)` lets you instantly replace all occurrences of the symbol under your cursor with a specified string.
-- **Unrestricted replacements:** You can configure replacements to execute across the entire file, ignoring any active narrowing restrictions, by setting `wizard-replace-ignore-narrowing` to a non-nil value.
+- **Quick symbol replacement:** `(wizard-replace-symbol-at-point)` lets you instantly replace all occurrences of the symbol under your cursor with a specified string. (You can configure replacements to execute across the entire file, ignoring any active narrowing restrictions, by setting `wizard-replace-ignore-narrowing` to a non-nil value.)
 
 ### Code Navigation
 
