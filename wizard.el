@@ -495,43 +495,44 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
 
 (defun wizard--unindent-string (input-str)
   "Unindent INPUT-STR by removing the minimal common indentation."
-  (let* (;; Convert tabs to spaces in a temporary buffer to ensure raw character
-         ;; counting accurately reflects visual column depth.
-         (clean-str (with-temp-buffer
-                      (insert input-str)
-                      (untabify (point-min) (point-max))
-                      (buffer-string)))
+  (save-match-data
+    (let* (;; Convert tabs to spaces in a temporary buffer to ensure raw character
+           ;; counting accurately reflects visual column depth.
+           (clean-str (with-temp-buffer
+                        (insert input-str)
+                        (untabify (point-min) (point-max))
+                        (buffer-string)))
 
-         ;; To split the input string into individual lines for processing.
-         ;; It allows iterating over each line to measure its leading whitespace
-         ;; independently.
-         (lines (split-string clean-str "\n"))
+           ;; To split the input string into individual lines for processing.
+           ;; It allows iterating over each line to measure its leading whitespace
+           ;; independently.
+           (lines (split-string clean-str "\n"))
 
-         ;; To track the smallest amount of leading whitespace found across all
-         ;; lines. It starts as nil so the first non-empty line encountered can
-         ;; establish the initial baseline value.
-         (min-indent nil))
+           ;; To track the smallest amount of leading whitespace found across all
+           ;; lines. It starts as nil so the first non-empty line encountered can
+           ;; establish the initial baseline value.
+           (min-indent nil))
 
-    ;; Find the minimum indentation
-    (dolist (line lines)
-      ;; The line must not be empty
-      (unless (string-match-p "^[ \t]*$" line)
-        (string-match "^[ \t]*" line)
-        ;; And the indent should be lower than the one that has been found
-        ;; previously
-        (setq min-indent (if min-indent
-                             (min min-indent (match-end 0))
-                           (match-end 0)))))
+      ;; Find the minimum indentation
+      (dolist (line lines)
+        ;; The line must not be empty
+        (unless (string-match-p "^[ \t]*$" line)
+          (string-match "^[ \t]*" line)
+          ;; And the indent should be lower than the one that has been found
+          ;; previously
+          (setq min-indent (if min-indent
+                               (min min-indent (match-end 0))
+                             (match-end 0)))))
 
-    (setq min-indent (or min-indent 0))
+      (setq min-indent (or min-indent 0))
 
-    ;; Remove the minimum indentation from all lines
-    (mapconcat (lambda (line)
-                 (if (>= (length line) min-indent)
-                     (substring line min-indent)
-                   line))
-               lines
-               "\n")))
+      ;; Remove the minimum indentation from all lines
+      (mapconcat (lambda (line)
+                   (if (>= (length line) min-indent)
+                       (substring line min-indent)
+                     line))
+                 lines
+                 "\n"))))
 
 (defun wizard--insert-aligned ()
   "Paste text from the clipboard with the current line's indentation."
