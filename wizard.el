@@ -585,9 +585,6 @@ original position prior to the paste operation."
 
 ;;; Clipboard: Copy without indentation
 
-(declare-function pos-bol nil)
-(declare-function pos-eol nil)
-
 (defalias 'wizard--pos-bol
   (if (fboundp 'pos-bol) #'pos-bol #'line-beginning-position))
 
