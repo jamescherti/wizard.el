@@ -3,6 +3,9 @@
 ![License](https://img.shields.io/github/license/jamescherti/wizard.el)
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
+- Author: James Cherti <[https://www.jamescherti.com/](https://www.jamescherti.com/)>
+- License: GPL
+
 The [**wizard**](https://github.com/jamescherti/wizard.el) Emacs package provides a collection of useful Emacs functions.
 
 The philosophy behind this package is simple: **use the built-in functions Emacs already provides** to do what complex third-party packages do.
