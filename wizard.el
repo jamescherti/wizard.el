@@ -31,7 +31,12 @@
 ;;; Group
 
 (eval-when-compile
-  (require 'subr-x)) ;; when-let*
+  (require 'subr-x))
+
+;; Require subr-x at runtime only for older Emacs versions that lack
+;; string-trim-right
+(when (< emacs-major-version 28)
+  (require 'subr-x))
 
 (defgroup wizard nil
   "Buffer wizard settings and configuration."
