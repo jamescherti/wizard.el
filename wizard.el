@@ -30,6 +30,9 @@
 
 ;;; Group
 
+(eval-when-compile
+  (require 'subr-x)) ;; when-let*
+
 (defgroup wizard nil
   "Buffer wizard settings and configuration."
   :group 'convenience
