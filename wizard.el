@@ -33,9 +33,7 @@
 (eval-when-compile
   (require 'subr-x))
 
-;; Require subr-x at runtime only for older Emacs versions that lack
-;; string-trim-right
-(when (< emacs-major-version 28)
+(when (<= emacs-major-version 28)
   (require 'subr-x))
 
 (defgroup wizard nil
