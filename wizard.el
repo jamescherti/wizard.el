@@ -432,40 +432,49 @@ specified interactively), then remove all hi-lock highlighting."
 
 ;;; Highlight code tags
 
-(defvar wizard--compiled-hl-todo-keywords nil
+;; Make the compiled keyword cache buffer-local so enabling the mode in multiple
+;; buffers after customizing `wizard-hl-todo-keywords' does not overwrite the
+;; rules needed by `font-lock-remove-keywords' in other buffers.
+(defvar-local wizard--compiled-hl-todo-keywords nil
   "Internal cache of compiled font-lock keywords for highlighting TODOs.")
+
+(defun wizard--hl-todo-get-face ()
+  "Return the computed face or color property for the matched keyword.
+Assumes match group 1 contains the keyword string found in
+`wizard-hl-todo-keywords'."
+  (let ((color-or-face (cdr (assoc-string (match-string-no-properties 1)
+                                          wizard-hl-todo-keywords))))
+    (if (stringp color-or-face)
+        (list :foreground color-or-face :weight 'bold)
+      color-or-face)))
+
+(defun wizard--make-hl-todo-matcher (regexp)
+  "Create a byte-compiled matcher closure for REGEXP.
+REGEXP is the combined string pattern of all TODO keywords."
+  (lambda (limit)
+    ;; Bind `case-fold-search' to nil so lowercase words like "note" or "todo"
+    ;; in regular comment prose are not matched when font-lock folds case.
+    (let ((case-fold-search nil)
+          (match t))
+      ;; This loop is as minimal as possible for the byte-compiler. It
+      ;; short-circuits evaluation and avoids internal let-bindings.
+      (while (and (setq match (re-search-forward regexp limit t))
+                  (not (nth 4 (syntax-ppss)))))
+      match)))
 
 (defun wizard--compile-hl-todo-keywords ()
   "Translate `wizard-hl-todo-keywords' into optimized `font-lock' regexps."
-  (require 'seq)
-  (if (fboundp 'seq-group-by)
-      (let* (;; Group the alist by the cdr (the face/color)
-             ;; Result:
-             ;; '((font-lock-warning-face . (("TODO" . face)
-             ;;                              ("FIXME" . face))) ...)
-             (grouped-by-face (seq-group-by #'cdr wizard-hl-todo-keywords))
-             compiled-rules)
+  ;; Guard against an empty `wizard-hl-todo-keywords' list so `regexp-opt' does
+  ;; not produce an empty group that matches every symbol boundary.
+  (when wizard-hl-todo-keywords
+    ;; Extract all string keywords into a single optimized regexp
+    (let* ((keywords (mapcar #'car wizard-hl-todo-keywords))
+           (regexp (concat "\\_<\\(" (regexp-opt keywords) "\\)\\_>")))
 
-        (dolist (group grouped-by-face)
-          (let* ((color-or-face (car group))  ; This group's face/color
-                 (entries (cdr group))        ; The list of matching cons cells
-                 (keywords (mapcar #'car entries)) ; Extract string keywords
-
-                 ;; regexp-opt safely escapes and builds the fastest possible
-                 ;; OR-regexp
-                 (regexp (concat "\\<\\(" (regexp-opt keywords) "\\)\\>"))
-
-                 ;; Dynamically determine the face property
-                 (face-prop (if (stringp color-or-face)
-                                (list 'quote (list :foreground color-or-face
-                                                   :weight 'bold))
-                              (list 'quote color-or-face))))
-
-            ;; Add the optimized rule for this face group to our final list
-            (push (list regexp 1 face-prop 'prepend) compiled-rules)))
-
-        compiled-rules)
-    (error "Undefined: seq-group-by")))
+      ;; Return a single rule that matches all keywords in one pass and
+      ;; dispatches the face resolution to `wizard--hl-todo-get-face'.
+      (list (list (wizard--make-hl-todo-matcher regexp)
+                  1 '(wizard--hl-todo-get-face) 'prepend)))))
 
 ;;;###autoload
 (define-minor-mode wizard-hl-todo-local-mode
@@ -474,16 +483,19 @@ specified interactively), then remove all hi-lock highlighting."
 When enabled, this mode dynamically builds font-lock rules from
 the key-value pairs defined in `wizard-hl-todo-keywords'."
   :global nil
-  :lighter " bw-todo"
+  :lighter nil
   :group 'wizard
-  (if wizard-hl-todo-local-mode
-      (progn
-        ;; Compile and store the keywords so we can reliably remove them later
-        (setq wizard--compiled-hl-todo-keywords
-              (wizard--compile-hl-todo-keywords))
-        (font-lock-add-keywords nil wizard--compiled-hl-todo-keywords t))
-    ;; Remove the exact keywords we previously added
-    (font-lock-remove-keywords nil wizard--compiled-hl-todo-keywords))
+  ;; Always remove any previously registered keywords in this buffer first.
+  (when wizard--compiled-hl-todo-keywords
+    (font-lock-remove-keywords nil wizard--compiled-hl-todo-keywords)
+    (setq wizard--compiled-hl-todo-keywords nil))
+
+  (when wizard-hl-todo-local-mode
+    ;; Compile and store the keywords so we can reliably remove them later
+    (setq wizard--compiled-hl-todo-keywords
+          (wizard--compile-hl-todo-keywords))
+    (when wizard--compiled-hl-todo-keywords
+      (font-lock-add-keywords nil wizard--compiled-hl-todo-keywords t)))
 
   ;; Refresh font-lock to apply/remove changes immediately
   (when (bound-and-true-p font-lock-mode)
