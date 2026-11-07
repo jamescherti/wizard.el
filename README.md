@@ -4,7 +4,7 @@
 ![](https://jamescherti.com/misc/made-for-gnu-emacs.svg)
 
 - Author: James Cherti <[https://www.jamescherti.com/](https://www.jamescherti.com/)>
-- License: GPL
+- License: GPL 3.0 or later
 
 The [**wizard**](https://github.com/jamescherti/wizard.el) Emacs package provides a collection of useful Emacs functions.
 
