@@ -226,9 +226,9 @@ Preserve point, `window-start', and horizontal scrolling."
       (user-error "Buffer '%s' is not an indirect buffer"
                   (buffer-name target-buf)))
     (let* ((point-pos (with-current-buffer target-buf (point)))
-           (current-buf (current-buffer))
+           (cur-buf (current-buffer))
            (window (selected-window))
-           (buffer-in-current-window (eq current-buf (window-buffer window)))
+           (buffer-in-current-window (eq cur-buf (window-buffer window)))
            (window-start (when buffer-in-current-window
                            (window-start window)))
            (window-hscroll (when buffer-in-current-window
@@ -470,8 +470,7 @@ specified interactively), then remove all hi-lock highlighting."
 ;;;###autoload
 (define-minor-mode wizard-hl-todo-local-mode
   "Minor mode to highlight keywords like TODO, FIXME, etc.
-
-When enabled, this mode dynamically builds font-lock rules from
+The keywords are highlighted using font-lock rules from
 the key-value pairs defined in `wizard-hl-todo-keywords'."
   :global nil
   :lighter " bw-todo"
@@ -573,19 +572,19 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
           (insert text-to-paste))))))
 
 ;;;###autoload
-(defun wizard-paste-indented ()
-  "Paste text from the clipboard with the current line's indentation.
-It unindents the clipboard content by removing the minimal common leading
-whitespace and aligns it perfectly with the cursor's current physical column.
-If called outside the minibuffer, the cursor (point) is safely restored to its
-original position prior to the paste operation."
-  (interactive)
+(defun wizard-paste-indented (&optional arg)
+  "Paste the current kill aligned to the column at point.
+
+In the minibuffer, call `yank' with prefix argument ARG.  This applies
+the standard yank handlers and filters copied text properties according
+to `yank-excluded-properties'.
+
+Elsewhere, replace the active region if present, remove common leading
+indentation, align subsequent lines to the insertion column, and
+restore point."
+  (interactive "*P")
   (if (minibufferp)
-      (let ((content (condition-case nil
-                         (current-kill 0)
-                       (error nil))))
-        (when content
-          (insert content)))
+      (yank arg)
     (save-excursion
       (wizard--insert-aligned))))
 
