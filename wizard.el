@@ -548,7 +548,21 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
       ;; Clear the active region first so that the destination column depth
       ;; is evaluated from the true post-deletion insertion point.
       (when (use-region-p)
-        (delete-region (region-beginning) (region-end)))
+        (let ((region-start (region-beginning))
+              (region-end (region-end)))
+          ;; Exit Evil visual state explicitly before modifying the buffer so
+          ;; Evil's post-command hook does not override point or the `[` and
+          ;; `]` markers after the command finishes.
+          (when (and (bound-and-true-p evil-local-mode)
+                     (fboundp 'evil-visual-state-p)
+                     (evil-visual-state-p)
+                     (fboundp 'evil-exit-visual-state))
+            (evil-exit-visual-state))
+
+          ;; Guarantee point is at the top of the region before evaluating
+          ;; indentation, regardless of selection direction or Evil state.
+          (goto-char region-start)
+          (delete-region region-start region-end)))
 
       (let* (;; Create the literal whitespace string that will be prepended to
              ;; the pasted lines.
@@ -568,8 +582,25 @@ the key-value pairs defined in `wizard-hl-todo-keywords'."
                                "\n"
                                (concat "\n" new-indentation)
                                text))))
-        (when text-to-paste
-          (insert text-to-paste))))))
+        ;; Guard against empty strings so `1-' does not place the `]' marker
+        ;; before `start' when the kill ring contains only trailing newlines.
+        (when (and text-to-paste (not (string-empty-p text-to-paste)))
+          (let ((start (point)))
+            (insert text-to-paste)
+
+            ;; Emulate standard Emacs yank footprint for native region tracking.
+            (push-mark (point) t nil)
+
+            ;; Safely bridge Evil compatibility. If Evil is active, explicitly
+            ;; drop the `[` and `]` marks exactly like `evil-paste-after` does,
+            ;; making `evilclipboard-select-pasted` work perfectly.
+            (when (and (bound-and-true-p evil-local-mode)
+                       (fboundp 'evil-set-marker))
+              (evil-set-marker ?\[ start)
+              (evil-set-marker ?\] (max (point-min) (1- (point)))))
+
+            ;; Restore point to the beginning of the pasted text.
+            (goto-char start)))))))
 
 ;;;###autoload
 (defun wizard-paste-indented (&optional arg)
@@ -585,8 +616,7 @@ restore point."
   (interactive "*P")
   (if (minibufferp)
       (yank arg)
-    (save-excursion
-      (wizard--insert-aligned))))
+    (wizard--insert-aligned)))
 
 ;;; Clipboard: Copy without indentation
 
