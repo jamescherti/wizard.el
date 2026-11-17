@@ -1040,6 +1040,46 @@ to the standard `find-file' settings."
               (inhibit-same-window . nil))))
     (find-file filename wildcards)))
 
+(defun wizard--display-buffer-in-new-tab (buffer _alist)
+  "Create a new tab and display BUFFER there.
+
+Return the window displaying BUFFER.
+BUFFER is the buffer to display.
+_ALIST is the unused action alist."
+  (if (fboundp 'tab-bar-new-tab)
+      (progn
+        (tab-bar-new-tab)
+        (display-buffer-same-window buffer nil))
+    (error "Undefined: `tab-bar-new-tab'")))
+
+;;;###autoload
+(defun wizard-tab-bar-find-file-new-tab (filename &optional wildcards)
+  "Open FILENAME, reusing a tab or opening a new tab.
+
+Search all frames for an existing tab displaying the buffer. If found, select
+it. Otherwise, open a new tab and visit FILENAME there.
+
+Use ordinary `find-file' behavior when `tab-bar-mode' is disabled or the
+required tab functions are unavailable.
+
+FILENAME is the path or name of the file to open.
+WILDCARDS is a flag indicating whether to expand wildcards."
+  (interactive
+   (find-file-read-args "Find file: "
+                        (confirm-nonexistent-file-or-buffer)))
+  (let ((action-list display-buffer-overriding-action)
+        (inhibit-redisplay t))
+    (when (and (bound-and-true-p tab-bar-mode)
+               (fboundp 'tab-bar-get-buffer-tab)
+               (fboundp 'tab-bar-select-tab)
+               (fboundp 'tab-bar-new-tab))
+      (setq action-list
+            '((wizard--display-buffer-in-existing-tab
+               wizard--display-buffer-in-new-tab)
+              (inhibit-same-window . nil))))
+    (let ((display-buffer-overriding-action action-list))
+      (find-file filename wildcards))))
+
 ;;; Provide
 
 (provide 'wizard)

@@ -39,6 +39,8 @@ Instead of rewriting complex logic from scratch or adding heavy external depende
 
 - `(wizard-tab-bar-find-file)`: Open a file, reusing a tab that already displays it. Search all frames, preferring the current tab. If no matching tab exists, open the file in the current window. For example, run `M-x wizard-tab-bar-find-file` and choose `README.md`. If it is already displayed in another tab, switch to that tab and select its window. Otherwise, open it in the current window.
 
+- `(wizard-tab-bar-find-file-new-tab)`: Open a file, reusing a tab that already displays it. Search all frames, preferring the current tab. If no matching tab exists, open the file in a new tab. For example, run `M-x wizard-tab-bar-find-file-new-tab` and choose `README.md`. If it is already displayed in another tab, switch to that tab and select its window. Otherwise, open it in a new tab.
+
 ### Code Navigation
 
 - **Indentation jumping:** `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)` move your point to the nearest line with a lower indentation level, making it easy to navigate out of nested code blocks.
