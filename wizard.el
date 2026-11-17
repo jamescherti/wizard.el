@@ -6,7 +6,7 @@
 ;; Version: 1.1.7
 ;; URL: https://github.com/jamescherti/wizard.el
 ;; Keywords: convenience, tools, matching
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "27.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -350,18 +350,18 @@ inserted exactly as typed without Emacs trying to guess the capitalization."
 
 ;;; Highlight symbols
 
-(defun wizard-get-symbol-or-region-regexp ()
+(defun wizard--get-symbol-or-region-regexp ()
   "Return the regexp of the selected region or the default symbol at point."
   (if (use-region-p)
       (regexp-quote (buffer-substring-no-properties (region-beginning)
                                                     (region-end)))
     (find-tag-default-as-symbol-regexp)))
 
-(defun wizard-highlight-p ()
+(defun wizard--highlight-p ()
   "Return non-nil if the symbol at point is currently highlighted."
   (require 'hi-lock)
   (when (fboundp 'hi-lock--regexps-at-point)
-    (when-let* ((regexp (wizard-get-symbol-or-region-regexp)))
+    (when-let* ((regexp (wizard--get-symbol-or-region-regexp)))
       (member regexp (hi-lock--regexps-at-point)))))
 
 ;; Fixes an issue that occurs because wizard.el enables lexical binding at the
@@ -382,7 +382,7 @@ built-in `hi-lock' package without prompting for a face."
              (fboundp 'hi-lock-mode)
              (fboundp 'hi-lock-set-pattern))
     ;; Similar to `hi-lock-face-symbol-at-point'
-    (let* ((regexp (wizard-get-symbol-or-region-regexp))
+    (let* ((regexp (wizard--get-symbol-or-region-regexp))
            ;; Force the automatic selection of a face
            (hi-lock-auto-select-face t)
            ;; This is necessary to force the automatic selection of a face every
@@ -405,7 +405,7 @@ built-in `hi-lock' package without prompting for a face."
   (interactive)
   (require 'hi-lock)
   (when (fboundp 'hi-lock-unface-buffer)
-    (when-let* ((regexp (wizard-get-symbol-or-region-regexp)))
+    (when-let* ((regexp (wizard--get-symbol-or-region-regexp)))
       (hi-lock-unface-buffer regexp))))
 
 ;;;###autoload
@@ -415,7 +415,7 @@ built-in `hi-lock' package without prompting for a face."
 This function checks if the symbol at point is currently highlighted.
 If it is, it removes the highlight; otherwise, it applies the highlight."
   (interactive)
-  (if (wizard-highlight-p)
+  (if (wizard--highlight-p)
       (wizard-unhighlight-at-point)
     (wizard-highlight-at-point)))
 
@@ -892,6 +892,7 @@ history (or into `grep-command' if that history list is empty)."
 
 ;;; Reload buffer
 
+;;;###autoload
 (defun wizard-reload-current-buffer ()
   "Reload the current buffer from disk, preserving its exact window state.
 
@@ -991,7 +992,56 @@ If called interactively, it displays a message confirming the reload."
           (when (called-interactively-p 'any)
             (message "Reloaded: %s" (abbreviate-file-name file))))))))
 
+;;; `tab-bar-mode'
+
+(defun wizard--display-buffer-in-existing-tab (buffer _alist)
+  "Return a window displaying BUFFER in an existing tab.
+
+Search all frames, preferring the current tab. Select the matching frame and
+tab. Return nil if no matching tab exists.
+
+_ALIST is the unused buffer display action alist."
+  (if (fboundp 'tab-bar-select-tab)
+      (let ((target-tab (tab-bar-get-buffer-tab buffer t nil)))
+        (when target-tab
+          (let ((target-frame (alist-get 'frame target-tab))
+                (target-index (alist-get 'index target-tab)))
+            (select-frame-set-input-focus target-frame)
+            (if (fboundp 'tab-bar-select-tab)
+                (tab-bar-select-tab (1+ target-index))
+              (error "Undefined: `tab-bar-select-tab'"))
+            (get-buffer-window buffer target-frame))))
+    (error "Undefined: `tab-bar-select-tab'")))
+
+;;;###autoload
+(defun wizard-tab-bar-find-file (filename &optional wildcards)
+  "Open FILENAME, reusing a tab that already displays its buffer.
+
+Search all frames, preferring the current tab. If no matching tab exists, prefer
+the selected window of the current tab. Select the resulting window.
+
+Use ordinary `find-file' behavior when `tab-bar-mode' is disabled or the
+required tab functions are unavailable.
+
+When WILDCARDS is non-nil, expand wildcard patterns in FILENAME according to
+`find-file-wildcards' and visit each matching file. Handle directories according
+to the standard `find-file' settings."
+  (interactive
+   (find-file-read-args "Find file: "
+                        (confirm-nonexistent-file-or-buffer)))
+  (let ((display-buffer-overriding-action display-buffer-overriding-action)
+        (inhibit-redisplay t))
+    (when (and (bound-and-true-p tab-bar-mode)
+               (fboundp 'tab-bar-get-buffer-tab)
+               (fboundp 'tab-bar-select-tab))
+      (setq display-buffer-overriding-action
+            '((wizard--display-buffer-in-existing-tab
+               display-buffer-same-window)
+              (inhibit-same-window . nil))))
+    (find-file filename wildcards)))
+
 ;;; Provide
+
 (provide 'wizard)
 
 ;;; wizard.el ends here

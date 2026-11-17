@@ -35,6 +35,10 @@ Instead of rewriting complex logic from scratch or adding heavy external depende
 - **Noise-free Grep:** `(wizard-grep)` runs Grep with a clean, empty prompt. Unlike the built-in `M-x grep` which pre-fills the minibuffer with the entire shell command, this command lets you type only your search arguments. The base command is prepended automatically, reducing visual noise and preventing accidental edits to your flags.
 - **Quick symbol replacement:** `(wizard-replace-symbol-at-point)` lets you instantly replace all occurrences of the symbol under your cursor with a specified string. (You can configure replacements to execute across the entire file, ignoring any active narrowing restrictions, by setting `wizard-replace-ignore-narrowing` to a non-nil value.)
 
+### Tab bar
+
+- `(wizard-tab-bar-find-file)`: Open a file, reusing a tab that already displays it. Search all frames, preferring the current tab. If no matching tab exists, open the file in the current window. For example, run `M-x wizard-tab-bar-find-file` and choose `README.md`. If it is already displayed in another tab, switch to that tab and select its window. Otherwise, open it in the current window.
+
 ### Code Navigation
 
 - **Indentation jumping:** `(wizard-point-backward-to-lower-indentation)` and `(wizard-point-forward-to-lower-indentation)` move your point to the nearest line with a lower indentation level, making it easy to navigate out of nested code blocks.
