@@ -1001,7 +1001,8 @@ Search all frames, preferring the current tab. Select the matching frame and
 tab. Return nil if no matching tab exists.
 
 _ALIST is the unused buffer display action alist."
-  (if (fboundp 'tab-bar-select-tab)
+  (if (and (fboundp 'tab-bar-select-tab)
+           (fboundp '(fboundp 'tab-bar-get-buffer-tab)))
       (let ((target-tab (tab-bar-get-buffer-tab buffer t nil)))
         (when target-tab
           (let ((target-frame (alist-get 'frame target-tab))
