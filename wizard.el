@@ -1002,7 +1002,7 @@ tab. Return nil if no matching tab exists.
 
 _ALIST is the unused buffer display action alist."
   (if (and (fboundp 'tab-bar-select-tab)
-           (fboundp '(fboundp 'tab-bar-get-buffer-tab)))
+           (fboundp (fboundp 'tab-bar-get-buffer-tab)))
       (let ((target-tab (tab-bar-get-buffer-tab buffer t nil)))
         (when target-tab
           (let ((target-frame (alist-get 'frame target-tab))
@@ -1032,9 +1032,7 @@ to the standard `find-file' settings."
                         (confirm-nonexistent-file-or-buffer)))
   (let ((display-buffer-overriding-action display-buffer-overriding-action)
         (inhibit-redisplay t))
-    (when (and (bound-and-true-p tab-bar-mode)
-               (fboundp 'tab-bar-get-buffer-tab)
-               (fboundp 'tab-bar-select-tab))
+    (when (bound-and-true-p tab-bar-mode)
       (setq display-buffer-overriding-action
             '((wizard--display-buffer-in-existing-tab
                display-buffer-same-window)
@@ -1071,8 +1069,6 @@ WILDCARDS is a flag indicating whether to expand wildcards."
   (let ((action-list display-buffer-overriding-action)
         (inhibit-redisplay t))
     (when (and (bound-and-true-p tab-bar-mode)
-               (fboundp 'tab-bar-get-buffer-tab)
-               (fboundp 'tab-bar-select-tab)
                (fboundp 'tab-bar-new-tab))
       (setq action-list
             '((wizard--display-buffer-in-existing-tab
