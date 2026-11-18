@@ -1001,8 +1001,7 @@ Search all frames, preferring the current tab. Select the matching frame and
 tab. Return nil if no matching tab exists.
 
 _ALIST is the unused buffer display action alist."
-  (if (and (fboundp 'tab-bar-select-tab)
-           (fboundp (fboundp 'tab-bar-get-buffer-tab)))
+  (if (fboundp 'tab-bar-get-buffer-tab)
       (let ((target-tab (tab-bar-get-buffer-tab buffer t nil)))
         (when target-tab
           (let ((target-frame (alist-get 'frame target-tab))
@@ -1012,7 +1011,7 @@ _ALIST is the unused buffer display action alist."
                 (tab-bar-select-tab (1+ target-index))
               (error "Undefined: `tab-bar-select-tab'"))
             (get-buffer-window buffer target-frame))))
-    (error "Undefined: `tab-bar-select-tab'")))
+    (error "Undefined: `tab-bar-get-buffer-tab'")))
 
 ;;;###autoload
 (defun wizard-tab-bar-find-file (filename &optional wildcards)
